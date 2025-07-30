@@ -43,12 +43,12 @@ model Community {
 model Gallery {
   id          Int       @id @default(autoincrement())
   title       String
-  imageUrl    String
+  imageUrl    String?
   uploadedAt  DateTime  @default(now())
 
   // Relasi ke Community
-  community   Community @relation("CommunityGallery", fields: [communityId], references: [id])
-  communityId Int
+  community   Community? @relation("CommunityGallery", fields: [communityId], references: [id])
+  communityId Int?
 
   @@map("galleries")
 }
@@ -62,8 +62,8 @@ model Event {
   createdAt   DateTime  @default(now())
 
   // Relasi ke Community
-  createdBy   Community @relation("EventCreator", fields: [createdById], references: [id])
-  createdById Int
+  createdBy   Community? @relation("EventCreator", fields: [createdById], references: [id])
+  createdById Int?
 
   @@map("events")
 }

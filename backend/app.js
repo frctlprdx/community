@@ -1,10 +1,7 @@
-const express = require('express');
-const userRoutes = require('./src/routes/userRoutes');
+const express = require("express");
+const authRoutes = require("./src/routes/authRoutes");
 
 const app = express();
 app.use(express.json());
-
-// Register routes
-app.use('/api/', userRoutes);
 
 module.exports = app;
