@@ -30,7 +30,7 @@ exports.createPost = async (req, res) => {
   }
 };
 
-exports.readPost = async (req, res) => {
+exports.getAllPosts = async (req, res) => {
   try {
     const posts = await prisma.gallery.findMany({
       include: {
