@@ -5,7 +5,10 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Gallery from "./pages/Gallery";
 import Admin from "./pages/Admin";
-import Community from "./pages/Community";
+import CommunityLayout from "./layouts/CommunityLayouts";
+import CommunityEvents from "./pages/CommunityEvents";
+import CommunityGalleries from "./pages/CommunityGalleries";
+import CommunityMembers from "./pages/CommunityMember";
 
 function App() {
   return (
@@ -18,8 +21,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/admin" element= {<Admin />}/>
-          <Route path="/community" element= {<Community />}/>
+          <Route path="/admin" element={<Admin />} />
+
+          {/* Grouped routes for community with shared layout */}
+          <Route path="/community" element={<CommunityLayout />}>
+            <Route path="events" element={<CommunityEvents />} />
+            <Route path="galleries" element={<CommunityGalleries />} />
+            <Route path="members" element={<CommunityMembers />} />
+          </Route>
         </Routes>
       </div>
     </Router>
