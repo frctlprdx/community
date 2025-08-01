@@ -32,15 +32,12 @@ export default function Auth() {
     try {
       if (!isLogin) {
         // REGISTER
-        await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
-          {
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            role: formData.role,
-          }
-        );
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
+        });
         alert("Pendaftaran berhasil! Silakan login.");
         setIsLogin(true); // Alihkan ke mode login
       } else {
@@ -60,7 +57,7 @@ export default function Auth() {
         localStorage.setItem("user", user.name);
 
         alert("Login berhasil!");
-        navigate("/"); // Arahkan ke halaman utama
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Gagal:", err.response?.data || err.message);

@@ -11,14 +11,18 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
+  const [role, setRole] = useState("")
 
   // Saat mount pertama, ambil data dari localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const name = localStorage.getItem("user"); // Pastikan sesuai key saat login
+      const role = localStorage.getItem("role")
+      console.log(role);
       setIsLoggedIn(!!token);
       setUserName(name || "");
+      setRole(role)
     }
   }, []);
 
@@ -35,7 +39,6 @@ function Navbar() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-
   return (
     <div className="w-screen bg-transparent">
       <div className="p-4">
@@ -48,19 +51,24 @@ function Navbar() {
             </div>
 
             <div className="space-x-6 md:flex hidden">
-              <Link to="/" className="hover:underline text-[#00FFFF]">Home</Link>
-              <Link to="/gallery" className="hover:underline text-[#00FFFF]">Galeri</Link>
+              <Link to="/" className="hover:underline text-[#00FFFF]">
+                Home
+              </Link>
+              <Link to="/gallery" className="hover:underline text-[#00FFFF]">
+                Galeri
+              </Link>
               {!isLoggedIn && (
-                <Link to="/loginregister" className="hover:underline text-[#00FFFF]">Daftar</Link>
+                <Link
+                  to="/loginregister"
+                  className="hover:underline text-[#00FFFF]"
+                >
+                  Daftar
+                </Link>
               )}
             </div>
 
             <div className="flex items-center gap-4 relative">
-              {isLoggedIn ? (
-                <UserNav/>
-              ) : (
-                <GuestNav/>
-              )}
+              {role === "MEMBER" ? <UserNav /> : <GuestNav />}
 
               <button
                 aria-label="Menu"
@@ -78,12 +86,26 @@ function Navbar() {
 
           {isOpen && (
             <div className="flex flex-col items-center gap-2 px-6 pb-4 md:hidden">
-              <Link to="/" className="hover:underline text-[#00FFFF]">Home</Link>
-              <Link to="/gallery" className="hover:underline text-[#00FFFF]">Galeri</Link>
+              <Link to="/" className="hover:underline text-[#00FFFF]">
+                Home
+              </Link>
+              <Link to="/gallery" className="hover:underline text-[#00FFFF]">
+                Galeri
+              </Link>
               {!isLoggedIn ? (
                 <>
-                  <Link to="/loginregister" className="hover:underline text-[#00FFFF]">Daftar</Link>
-                  <Link to="/loginregister" className="hover:underline text-[#00FFFF]">Login</Link>
+                  <Link
+                    to="/loginregister"
+                    className="hover:underline text-[#00FFFF]"
+                  >
+                    Daftar
+                  </Link>
+                  <Link
+                    to="/loginregister"
+                    className="hover:underline text-[#00FFFF]"
+                  >
+                    Login
+                  </Link>
                 </>
               ) : (
                 <>

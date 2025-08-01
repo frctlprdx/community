@@ -6,9 +6,7 @@ function UserNav() {
 
   const handleLogout = () => {
     localStorage.clear();
-    setIsLoggedIn(false);
-    setUserName("");
-    navigate("/");
+    window.location.href = "/";
   };
   return (
     <>
