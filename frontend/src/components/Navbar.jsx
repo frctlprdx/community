@@ -11,22 +11,22 @@ function Navbar() {
   return (
     <div className="w-screen bg-transparent">
       <div className="p-4">
-        <nav className="w-full bg-white/30 backdrop-blur-md sticky top-0 z-10 md:rounded-full rounded-xl shadow-md">
+        <nav className="w-full bg-[#8A2BE2]/30 backdrop-blur-md sticky top-0 z-10 md:rounded-full rounded-xl shadow-md">
           <div className="flex justify-between items-center px-6 py-4">
             <div className="text-xl font-bold">
-              <a href="/" className="text-2xl">
+              <a href="/" className="text-2xl text-[#00FFFF]">
                 Kosuco
               </a>
             </div>
 
             <div className="space-x-6 md:flex hidden">
-              <a href="/" className="hover:underline">
+              <a href="/" className="hover:underline text-[#00FFFF]">
                 Home
               </a>
-              <a href="/gallery" className="hover:underline">
+              <a href="/gallery" className="hover:underline text-[#00FFFF]">
                 Galeri
               </a>
-              <a href="/register" className="hover:underline">
+              <a href="/register" className="hover:underline text-[#00FFFF]">
                 Daftar
               </a>
             </div>
@@ -39,7 +39,7 @@ function Navbar() {
               ) : (
                 <Link
                   to="/loginregister"
-                  className="md:block hidden hover:underline"
+                  className="md:block hidden hover:underline text-[#00FFFF]"
                 >
                   Login
                 </Link>

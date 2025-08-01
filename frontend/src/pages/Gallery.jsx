@@ -33,22 +33,24 @@ function Gallery() {
   ];
 
   return (
-    <section className="min-h-screen bg-white p-6">
-      <h2 className="text-3xl font-bold text-center mb-8">Galeri Komunitas</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section className="min-h-screen bg-gradient-to-br from-[#bg-[#0F0F0F]] via-[#bg-[#0F0F0F]] to-[#24243e] text-white py-12 px-6">
+      <h2 className="text-4xl font-bold text-center mb-12 text-[#FF00FF]">
+        Galeri Komunitas
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {images.map((item, index) => (
           <div
             key={index}
-            className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+            className="bg-[#1a1a2e] rounded-xl overflow-hidden shadow-lg hover:shadow-cyan-500/40 transition-all duration-300 border border-pink-500 hover:scale-105"
           >
             <img
               src={item.src}
               alt={item.title}
-              className="w-full h-64 object-cover"
+              className="w-full h-64 object-cover brightness-90 hover:brightness-110 transition-all duration-300"
             />
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="text-gray-500 text-sm">{item.date}</p>
+            <div className="p-5">
+              <h3 className="text-xl font-semibold text-cyan-300">{item.title}</h3>
+              <p className="text-sm text-purple-400">{item.date}</p>
             </div>
           </div>
         ))}
