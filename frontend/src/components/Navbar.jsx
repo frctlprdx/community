@@ -11,7 +11,6 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
-  const navigate = useNavigate();
 
   // Saat mount pertama, ambil data dari localStorage
   useEffect(() => {
@@ -36,7 +35,6 @@ function Navbar() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  
 
   return (
     <div className="w-screen bg-transparent">
