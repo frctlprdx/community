@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Gallery from "./pages/Gallery";
 import Admin from "./pages/Admin";
+import Auth from "./pages/Auth";
 import CommunityLayout from "./layouts/CommunityLayouts";
 import CommunityEvents from "./pages/CommunityEvents";
 import CommunityGalleries from "./pages/CommunityGalleries";
@@ -21,9 +22,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/loginregister" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
 
-          {/* Grouped routes for community with shared layout */}
           <Route path="/community" element={<CommunityLayout />}>
             <Route path="events" element={<CommunityEvents />} />
             <Route path="galleries" element={<CommunityGalleries />} />

@@ -1,12 +1,42 @@
-import { useState } from "react";
-import { CgProfile } from "react-icons/cg";
+// Navbar.tsx
+
+import { useState, useEffect } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import UserNav from "./UserNav";
+import GuestNav from "./GuestNav";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const navigate = useNavigate();
+
+  // Saat mount pertama, ambil data dari localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      const name = localStorage.getItem("user"); // Pastikan sesuai key saat login
+      setIsLoggedIn(!!token);
+      setUserName(name || "");
+    }
+  }, []);
+
+  // Reaktif terhadap perubahan localStorage (misalnya logout dari tab lain)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("token");
+      const name = localStorage.getItem("user");
+      setIsLoggedIn(!!token);
+      setUserName(name || "");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  
 
   return (
     <div className="w-screen bg-transparent">
@@ -14,75 +44,59 @@ function Navbar() {
         <nav className="w-full bg-[#8A2BE2]/30 backdrop-blur-md sticky top-0 z-10 md:rounded-full rounded-xl shadow-md">
           <div className="flex justify-between items-center px-6 py-4">
             <div className="text-xl font-bold">
-              <a href="/" className="text-2xl text-[#00FFFF]">
+              <Link to="/" className="text-2xl text-[#00FFFF]">
                 Kosuco
-              </a>
+              </Link>
             </div>
 
             <div className="space-x-6 md:flex hidden">
-              <a href="/" className="hover:underline text-[#00FFFF]">
-                Home
-              </a>
-              <a href="/gallery" className="hover:underline text-[#00FFFF]">
-                Galeri
-              </a>
-              <a href="/register" className="hover:underline text-[#00FFFF]">
-                Daftar
-              </a>
+              <Link to="/" className="hover:underline text-[#00FFFF]">Home</Link>
+              <Link to="/gallery" className="hover:underline text-[#00FFFF]">Galeri</Link>
+              {!isLoggedIn && (
+                <Link to="/loginregister" className="hover:underline text-[#00FFFF]">Daftar</Link>
+              )}
             </div>
 
-            <div className="flex items-center gap-4">
-              {isLogin ? (
-                <Link to="/profile" className="md:block hidden text-2xl">
-                  <CgProfile />
-                </Link>
+            <div className="flex items-center gap-4 relative">
+              {isLoggedIn ? (
+                <UserNav/>
               ) : (
-                <Link
-                  to="/loginregister"
-                  className="md:block hidden hover:underline text-[#00FFFF]"
-                >
-                  Login
-                </Link>
+                <GuestNav/>
               )}
 
-              {/* Tombol toggle login (hanya untuk testing sementara) */}
               <button
-                onClick={() => setIsLogin(!isLogin)}
-                className="hidden md:block text-sm text-gray-600 hover:underline"
-              >
-                {isLogin ? "Logout" : "Set Login"}
-              </button>
-
-              {/* Tombol burger-menu mobile */}
-              <button
+                aria-label="Menu"
                 className="md:hidden block text-2xl text-gray-800 cursor-pointer"
                 onClick={() => setIsOpen(!isOpen)}
               >
-                {isOpen ? <IoCloseSharp /> : <GiHamburgerMenu />}
+                {isOpen ? (
+                  <IoCloseSharp className="text-[#00FFFF]" />
+                ) : (
+                  <GiHamburgerMenu className="text-[#00FFFF]" />
+                )}
               </button>
             </div>
           </div>
 
           {isOpen && (
             <div className="flex flex-col items-center gap-2 px-6 pb-4 md:hidden">
-              <a href="/" className="hover:underline">
-                Home
-              </a>
-              <a href="/gallery" className="hover:underline">
-                Galeri
-              </a>
-              <a href="/register" className="hover:underline">
-                Daftar
-              </a>
-
-              {isLogin ? (
-                <a href="/loginregister" className="hover:underline">
-                  Login
-                </a>
+              <Link to="/" className="hover:underline text-[#00FFFF]">Home</Link>
+              <Link to="/gallery" className="hover:underline text-[#00FFFF]">Galeri</Link>
+              {!isLoggedIn ? (
+                <>
+                  <Link to="/loginregister" className="hover:underline text-[#00FFFF]">Daftar</Link>
+                  <Link to="/loginregister" className="hover:underline text-[#00FFFF]">Login</Link>
+                </>
               ) : (
-                <a href="/profile" className="">
-                  Edit Profile
-                </a>
+                <>
+                  <span className="text-[#00FFFF]">Hi, {userName}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-[#FF6B6B] font-semibold hover:underline"
+                  >
+                    Logout
+                  </button>
+                </>
               )}
             </div>
           )}
