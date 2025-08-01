@@ -1,8 +1,19 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 export default function CommunityEvents() {
-  return (
-    <>
-      <h1 className="text-3xl font-bold mb-4">Event Komunitas</h1>
-      <p>Daftar dan manajemen event komunitas akan ditampilkan di sini.</p>
-    </>
-  );
+  const [role, setRole] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+
+    // Jika bukan COMMUNITY, redirect ke home
+    if (storedRole !== "COMMUNITY") {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
+  return <>{role === "COMMUNITY" && <div className="text-white">halo</div>}</>;
 }

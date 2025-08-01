@@ -1,8 +1,17 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 export default function CommunityGalleries() {
-  return (
-    <>
-      <h1 className="text-3xl font-bold mb-4">Galeri Komunitas</h1>
-      <p>Kelola galeri dokumentasi komunitas dari berbagai kegiatan.</p>
-    </>
-  );
+  const [role, setRole] = useState("");
+  const navigate = useNavigate();
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+
+    // Jika bukan COMMUNITY, redirect ke home
+    if (storedRole !== "COMMUNITY") {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+  return <>{role === "COMMUNITY" && <div className="text-white">halo</div>}</>;
 }
