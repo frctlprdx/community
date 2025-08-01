@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Gallery from "./pages/Gallery";
 import Admin from "./pages/Admin";
+import Community from "./pages/Community";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin" element= {<Admin />}/>
+          <Route path="/community" element= {<Community />}/>
         </Routes>
       </div>
     </Router>
