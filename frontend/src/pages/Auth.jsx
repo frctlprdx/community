@@ -61,6 +61,7 @@ export default function Auth() {
             {
               name: formData.name,
               email: formData.email,
+              phone_number: formData.phone_number,
               password: formData.password,
             }
           );

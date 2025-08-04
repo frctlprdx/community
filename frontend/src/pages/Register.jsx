@@ -56,8 +56,8 @@ function Register() {
 
     try {
       await axios.post(`${import.meta.env.VITE_API_BASE_URL}/community/join`, {
-        userId: formData.userId,
-        communityId: formData.communityId,
+        userId: parseInt(formData.userId),
+        communityId: parseInt(formData.communityId),
       });
       alert("Berhasil mendaftar komunitas!");
     } catch (error) {
@@ -159,7 +159,7 @@ function Register() {
             </select>
           </div>
 
-          <div>
+          {/* <div>
             <label
               htmlFor="reason"
               className="block text-sm font-medium text-white oxanium-regular"
@@ -175,7 +175,7 @@ function Register() {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
             ></textarea>
-          </div>
+          </div> */}
 
           <button
             type="submit"

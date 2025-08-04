@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
 exports.createCommunity = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phone_number} = req.body;
 
   try {
     if (!name || !email || !password) {
@@ -38,6 +38,7 @@ exports.createCommunity = async (req, res) => {
         name,
         email,
         passwordHash,
+        phone_number,
         role: "COMMUNITY",
       },
     });
@@ -105,18 +106,62 @@ exports.updateCommunity = async (req, res) => {
 
 exports.joinCommunity = async (req, res) => {
   try {
+    console.log("=== JOIN COMMUNITY DEBUG ===");
+    console.log("Request body:", req.body);
+
     const { userId, communityId } = req.body;
 
     if (!userId || !communityId) {
+      console.log("Missing userId or communityId");
       return res
         .status(400)
         .json({ message: "userId dan communityId wajib diisi" });
     }
 
-    // Cek jika sudah tergabung (opsional)
-    const existing = await db.community_members.findOne({
-      where: { userId, communityId },
+    const userIdInt = parseInt(userId);
+    const communityIdInt = parseInt(communityId);
+
+    console.log("Parsed IDs:", { userIdInt, communityIdInt });
+
+    if (isNaN(userIdInt) || isNaN(communityIdInt)) {
+      console.log("Invalid number format");
+      return res
+        .status(400)
+        .json({ message: "userId dan communityId harus berupa angka" });
+    }
+
+    // Cek apakah user dan community ada
+    console.log("Checking user exists...");
+    const user = await prisma.user.findUnique({
+      where: { id: userIdInt },
     });
+    console.log("User found:", !!user);
+
+    console.log("Checking community exists...");
+    const community = await prisma.community.findUnique({
+      where: { id: communityIdInt },
+    });
+    console.log("Community found:", !!community);
+
+    if (!user) {
+      return res.status(400).json({ message: "User tidak ditemukan" });
+    }
+
+    if (!community) {
+      return res.status(400).json({ message: "Community tidak ditemukan" });
+    }
+
+    // Cek membership yang sudah ada
+    console.log("Checking existing membership...");
+    const existing = await prisma.communityMember.findUnique({
+      where: {
+        userId_communityId: {
+          userId: userIdInt,
+          communityId: communityIdInt,
+        },
+      },
+    });
+    console.log("Existing membership:", !!existing);
 
     if (existing) {
       return res
@@ -124,15 +169,43 @@ exports.joinCommunity = async (req, res) => {
         .json({ message: "Sudah tergabung di komunitas ini" });
     }
 
-    // Simpan ke database
-    await db.community_members.create({
-      userId,
-      communityId,
+    // Create new membership
+    console.log("Creating new membership...");
+    const newMember = await prisma.communityMember.create({
+      data: {
+        userId: userIdInt,
+        communityId: communityIdInt,
+      },
     });
+    console.log("New member created:", newMember);
 
-    res.status(201).json({ message: "Berhasil bergabung ke komunitas" });
+    res.status(201).json({
+      message: "Berhasil bergabung ke komunitas",
+      data: newMember,
+    });
   } catch (error) {
-    console.error("Error join community:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    console.error("=== ERROR DETAILS ===");
+    console.error("Error name:", error.name);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
+    console.error("Full error:", error);
+
+    // Handle Prisma specific errors
+    if (error.code === "P2002") {
+      return res.status(400).json({
+        message: "Sudah tergabung di komunitas ini",
+      });
+    }
+
+    if (error.code === "P2003") {
+      return res.status(400).json({
+        message: "User atau Community tidak ditemukan",
+      });
+    }
+
+    res.status(500).json({
+      message: "Terjadi kesalahan pada server",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };

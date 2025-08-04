@@ -22,7 +22,7 @@ function UserNav() {
         <div className="absolute top-10 right-0 bg-white shadow-md rounded-md py-2 px-4 z-20 text-sm w-36">
           <button
             onClick={handleLogout}
-            className="text-[#FF6B6B] hover:underline"
+            className="text-[#FF6B6B] hover:underline oxanium-regular"
           >
             Logout
           </button>

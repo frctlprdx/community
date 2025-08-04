@@ -93,23 +93,23 @@ function Navbar() {
 
           {isOpen && (
             <div className="flex flex-col items-center gap-2 px-6 pb-4 md:hidden">
-              <Link to="/" className="hover:underline text-[#00FFFF]">
+              <Link to="/" className="hover:underline text-[#00FFFF] oxanium-regular">
                 Home
               </Link>
-              <Link to="/gallery" className="hover:underline text-[#00FFFF]">
+              <Link to="/gallery" className="hover:underline text-[#00FFFF] oxanium-regular">
                 Galeri
               </Link>
               {!isLoggedIn ? (
                 <>
                   <Link
                     to="/register"
-                    className="hover:underline text-[#00FFFF]"
+                    className="hover:underline text-[#00FFFF] oxanium-regular"
                   >
                     Daftar
                   </Link>
                   <Link
                     to="/loginregister"
-                    className="hover:underline text-[#00FFFF]"
+                    className="hover:underline text-[#00FFFF] oxanium-regular"
                   >
                     Login
                   </Link>
