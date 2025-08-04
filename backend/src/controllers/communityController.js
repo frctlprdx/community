@@ -39,7 +39,6 @@ exports.createCommunity = async (req, res) => {
         email,
         passwordHash,
         role: "COMMUNITY",
-        communityId: newCommunity.id, // relasi ke komunitas
       },
     });
 
@@ -106,27 +105,34 @@ exports.updateCommunity = async (req, res) => {
 
 exports.joinCommunity = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { userId } = req.body; // ID user yang ingin bergabung
+    const { userId, communityId } = req.body;
 
-    // Cek apakah komunitas ada
-    const community = await prisma.community.findUnique({
-      where: { id: parseInt(id) },
-    });
-
-    if (!community) {
-      return res.status(404).json({ message: "Community not found" });
+    if (!userId || !communityId) {
+      return res
+        .status(400)
+        .json({ message: "userId dan communityId wajib diisi" });
     }
 
-    // Tambahkan user ke komunitas
-    await prisma.user.update({
-      where: { id: parseInt(userId) },
-      data: { communityId: community.id },
+    // Cek jika sudah tergabung (opsional)
+    const existing = await db.community_members.findOne({
+      where: { userId, communityId },
     });
 
-    res.status(200).json({ message: "User joined the community successfully" });
+    if (existing) {
+      return res
+        .status(400)
+        .json({ message: "Sudah tergabung di komunitas ini" });
+    }
+
+    // Simpan ke database
+    await db.community_members.create({
+      userId,
+      communityId,
+    });
+
+    res.status(201).json({ message: "Berhasil bergabung ke komunitas" });
   } catch (error) {
-    console.error("Error joining community:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error join community:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
   }
-}
+};

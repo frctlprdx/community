@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, phone_number, password } = req.body;
 
   try {
     // Cek apakah email sudah digunakan
@@ -25,6 +25,7 @@ exports.register = async (req, res) => {
         name,
         email,
         passwordHash,
+        phone_number,
         role: "MEMBER", // default
       },
     });

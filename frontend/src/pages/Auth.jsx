@@ -9,6 +9,7 @@ export default function Auth() {
     name: "",
     email: "",
     password: "",
+    phone_number: "",
     role: "",
   });
 
@@ -48,6 +49,7 @@ export default function Auth() {
               name: formData.name,
               email: formData.email,
               password: formData.password,
+              phone_number: formData.phone_number,
               role: formData.role,
             }
           );
@@ -79,7 +81,10 @@ export default function Auth() {
 
         // Simpan ke localStorage
         localStorage.setItem("role", user.role);
+        localStorage.setItem("id", user.id);
         localStorage.setItem("user", user.name);
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("phone_number", user.phone_number);
 
         alert("Login berhasil!");
 
@@ -108,7 +113,7 @@ export default function Auth() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Nama Lengkap"
+                placeholder="Nama Lengkap / Komunitas"
                 className="w-full p-2 rounded bg-white/20 placeholder-white focus:outline-none"
                 required
               />
@@ -124,6 +129,14 @@ export default function Auth() {
                 <option value="COMMUNITY">Community</option>
                 <option value="ADMIN">Admin</option>
               </select>
+              <input
+                type="text"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                placeholder="Phone Number"
+                className="w-full p-2 rounded bg-white/20 placeholder-white focus:outline-none"
+              />
             </>
           )}
 
