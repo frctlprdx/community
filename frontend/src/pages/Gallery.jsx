@@ -34,10 +34,10 @@ function Gallery() {
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-[#bg-[#0F0F0F]] via-[#bg-[#0F0F0F]] to-[#24243e] text-white py-12 px-6">
-      <h2 className="text-4xl font-bold text-center mb-12 text-[#FF00FF]">
+      <h2 className="text-4xl font-bold text-center mb-12 text-[#FF00FF] oxanium-regular">
         Galeri Komunitas
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 audiowide-regular">
         {images.map((item, index) => (
           <div
             key={index}

@@ -26,6 +26,16 @@ export default function Auth() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const redirectByRole = (role) => {
+    if (role === "COMMUNITY") {
+      navigate("/community/events");
+    } else if (role === "ADMIN") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -39,7 +49,7 @@ export default function Auth() {
           role: formData.role,
         });
         alert("Pendaftaran berhasil! Silakan login.");
-        setIsLogin(true); // Alihkan ke mode login
+        setIsLogin(true);
       } else {
         // LOGIN
         const res = await axios.post(
@@ -52,12 +62,15 @@ export default function Auth() {
 
         const { user } = res.data;
 
-        // Simpan role dan nama ke localStorage
+        // Simpan ke localStorage
         localStorage.setItem("role", user.role);
         localStorage.setItem("user", user.name);
 
         alert("Login berhasil!");
-        window.location.href = "/";
+
+        // Redirect sesuai role
+        redirectByRole(user.role);
+        setTimeout(() => navigate(0), 100); // mini refresh
       }
     } catch (err) {
       console.error("Gagal:", err.response?.data || err.message);

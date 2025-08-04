@@ -11,18 +11,20 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
-  const [role, setRole] = useState("")
+  const [role, setRole] = useState(false);
 
   // Saat mount pertama, ambil data dari localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       const name = localStorage.getItem("user"); // Pastikan sesuai key saat login
-      const role = localStorage.getItem("role")
+      const role = localStorage.getItem("role");
       console.log(role);
       setIsLoggedIn(!!token);
       setUserName(name || "");
-      setRole(role)
+      if (role) {
+        setRole(true);
+      }
     }
   }, []);
 
@@ -45,30 +47,30 @@ function Navbar() {
         <nav className="w-full bg-[#8A2BE2]/30 backdrop-blur-md sticky top-0 z-10 md:rounded-full rounded-xl shadow-md">
           <div className="flex justify-between items-center px-6 py-4">
             <div className="text-xl font-bold">
-              <Link to="/" className="text-2xl text-[#00FFFF]">
+              <Link to="/" className="text-2xl text-[#00FFFF] orbitron-regular">
                 Kosuco
               </Link>
             </div>
 
             <div className="space-x-6 md:flex hidden">
-              <Link to="/" className="hover:underline text-[#00FFFF]">
+              <Link to="/" className="hover:underline text-[#00FFFF] orbitron-regular">
                 Home
               </Link>
-              <Link to="/gallery" className="hover:underline text-[#00FFFF]">
+              <Link to="/gallery" className="hover:underline text-[#00FFFF] orbitron-regular">
                 Galeri
               </Link>
               {!isLoggedIn && (
                 <Link
-                  to="/loginregister"
-                  className="hover:underline text-[#00FFFF]"
+                  to="/register"
+                  className="hover:underline text-[#00FFFF] orbitron-regular"
                 >
                   Daftar
                 </Link>
               )}
             </div>
 
-            <div className="flex items-center gap-4 relative">
-              {role === "MEMBER" ? <UserNav /> : <GuestNav />}
+            <div className="flex items-center gap-4 relative ">
+              {role === true ? <UserNav /> : <GuestNav />}
 
               <button
                 aria-label="Menu"
@@ -95,7 +97,7 @@ function Navbar() {
               {!isLoggedIn ? (
                 <>
                   <Link
-                    to="/loginregister"
+                    to="/register"
                     className="hover:underline text-[#00FFFF]"
                   >
                     Daftar

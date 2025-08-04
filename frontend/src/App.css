@@ -1,8 +1,28 @@
 @import "tailwindcss";
+/* src/App.css */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap");
+
+.audiowide-regular {
+  font-family: "Audiowide", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.orbitron-regular {
+  font-family: "Orbitron", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+.oxanium-regular {
+  font-family: "Oxanium", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
 
 html,
 body,
 #root {
-  background-color: #0F0F0F; /* ini warna bg-blue-300 */
+  background-color: #0f0f0f; /* ini warna bg-blue-300 */
   width: 100%;
 }
