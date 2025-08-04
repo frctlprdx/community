@@ -68,3 +68,28 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.community = async (req, res) => {
+  const { name } = req.body;
+
+  try {
+    if (!name) {
+      return res.status(400).json({ message: "Nama komunitas wajib diisi" });
+    }
+
+    const newCommunity = await prisma.community.create({
+      data: {
+        name,
+      },
+    });
+
+    res.status(201).json({
+      message: "Komunitas berhasil didaftarkan",
+      community: newCommunity,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Terjadi kesalahan saat mendaftar komunitas",
+      error: err.message,
+    });
+  }
+};

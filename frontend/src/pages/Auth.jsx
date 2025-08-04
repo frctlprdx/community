@@ -9,7 +9,7 @@ export default function Auth() {
     name: "",
     email: "",
     password: "",
-    role: "MEMBER",
+    role: "",
   });
 
   const handleSwitch = () => {
@@ -18,7 +18,7 @@ export default function Auth() {
       name: "",
       email: "",
       password: "",
-      role: "MEMBER",
+      role: "",
     });
   };
 
@@ -41,15 +41,28 @@ export default function Auth() {
 
     try {
       if (!isLogin) {
-        // REGISTER
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-        });
-        alert("Pendaftaran berhasil! Silakan login.");
-        setIsLogin(true);
+        if (formData.role === "MEMBER") {
+          await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
+            {
+              name: formData.name,
+              email: formData.email,
+              password: formData.password,
+              role: formData.role,
+            }
+          );
+          alert("Pendaftaran berhasil! Silakan login.");
+          setIsLogin(true);
+        } else if (formData.role === "COMMUNITY") {
+          const res = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/auth/community`,
+            {
+              name: formData.name,
+            }
+          );
+          alert("Community registration successful! Please login.");
+          setIsLogin(true);
+        }
       } else {
         // LOGIN
         const res = await axios.post(
