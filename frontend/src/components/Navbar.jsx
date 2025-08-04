@@ -12,6 +12,7 @@ function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState(false);
+  const [show, setShow] = useState(true);
 
   // Saat mount pertama, ambil data dari localStorage
   useEffect(() => {
@@ -19,11 +20,13 @@ function Navbar() {
       const token = localStorage.getItem("token");
       const name = localStorage.getItem("user"); // Pastikan sesuai key saat login
       const role = localStorage.getItem("role");
-      console.log(role);
       setIsLoggedIn(!!token);
       setUserName(name || "");
       if (role) {
         setRole(true);
+        if (role === "COMMUNITY") {
+          setShow(false);
+        }
       }
     }
   }, []);
@@ -52,7 +55,8 @@ function Navbar() {
               </Link>
             </div>
 
-            <div className="space-x-6 md:flex hidden">
+            { show && (
+              <div className="space-x-6 md:flex hidden">
               <Link to="/" className="hover:underline text-[#00FFFF] orbitron-regular">
                 Home
               </Link>
@@ -68,6 +72,7 @@ function Navbar() {
                 </Link>
               )}
             </div>
+            )}
 
             <div className="flex items-center gap-4 relative ">
               {role === true ? <UserNav /> : <GuestNav />}

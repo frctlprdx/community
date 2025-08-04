@@ -4,6 +4,7 @@ const communityController = require('../controllers/communityController');
 
 router.post("/create", communityController.createCommunity);
 router.get("/get", communityController.getAllCommunities);
+router.put("/join/:id", communityController.joinCommunity);
 router.delete("/delete/:id", communityController.deleteCommunity);
 router.put("/update/:id", communityController.updateCommunity);
 

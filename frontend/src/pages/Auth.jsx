@@ -18,7 +18,7 @@ export default function Auth() {
       name: "",
       email: "",
       password: "",
-      role: "",
+      role: "MEMBER",
     });
   };
 
@@ -55,9 +55,11 @@ export default function Auth() {
           setIsLogin(true);
         } else if (formData.role === "COMMUNITY") {
           const res = await axios.post(
-            `${import.meta.env.VITE_API_BASE_URL}/auth/community`,
+            `${import.meta.env.VITE_API_BASE_URL}/community/create`,
             {
               name: formData.name,
+              email: formData.email,
+              password: formData.password,
             }
           );
           alert("Community registration successful! Please login.");
@@ -115,6 +117,7 @@ export default function Auth() {
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
+                required
                 className="w-full p-2 rounded bg-white/20 text-white focus:outline-none"
               >
                 <option value="MEMBER">Member</option>

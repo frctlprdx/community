@@ -1,26 +1,58 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const bcrypt = require("bcrypt");
 
 exports.createCommunity = async (req, res) => {
-  try {
-    const { name } = req.body;
+  const { name, email, password } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "Name is required." });
+  try {
+    if (!name || !email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Name, email, and password are required." });
     }
 
+    // Cek apakah email sudah digunakan
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Email sudah digunakan" });
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // Buat komunitas baru
     const newCommunity = await prisma.community.create({
       data: {
         name,
       },
     });
+
+    // Buat user dan sambungkan ke komunitas lewat communityId
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        passwordHash,
+        role: "COMMUNITY",
+        communityId: newCommunity.id, // relasi ke komunitas
+      },
+    });
+
     res.status(201).json({
-      message: "new community created successfully",
-      data: newCommunity,
+      message: "Komunitas dan user berhasil dibuat",
+      community: newCommunity,
+      user: newUser,
     });
   } catch (error) {
-    console.error("Error creating community:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("DETAIL ERROR:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
 
@@ -71,3 +103,30 @@ exports.updateCommunity = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.joinCommunity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body; // ID user yang ingin bergabung
+
+    // Cek apakah komunitas ada
+    const community = await prisma.community.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // Tambahkan user ke komunitas
+    await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: { communityId: community.id },
+    });
+
+    res.status(200).json({ message: "User joined the community successfully" });
+  } catch (error) {
+    console.error("Error joining community:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
