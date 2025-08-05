@@ -1,4 +1,20 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Home() {
+  const [role, setRole] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem("role");
+    setRole(storedRole);
+
+    if (role == "COMMUNITY" || role == "ADMIN") {
+      navigate("/community/members", { replace: true });
+      return;
+    }
+  });
+
   return (
     <div className="w-screen min-h-screen bg-[#0F0F0F] text-[#CCCCCC]">
       {/* Hero Section */}

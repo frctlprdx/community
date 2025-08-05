@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
 exports.createCommunity = async (req, res) => {
-  const { name, email, password, phone_number} = req.body;
+  const { name, email, password, phone_number } = req.body;
 
   try {
     if (!name || !email || !password) {
@@ -207,5 +207,55 @@ exports.joinCommunity = async (req, res) => {
       message: "Terjadi kesalahan pada server",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
+  }
+};
+
+exports.communityMember = async (req, res) => {
+  try {
+    const communityId = parseInt(req.params.id);
+
+    if (isNaN(communityId)) {
+      return res.status(400).json({ message: "ID komunitas tidak valid" });
+    }
+
+    const members = await prisma.communityMember.findMany({
+      where: {
+        communityId: communityId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone_number: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json(members);
+  } catch (error) {
+    console.error("Error fetching community members:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
+
+exports.deleteMember = async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.id);
+
+    const deleted = await db.communityMember.delete({
+      where: {
+        id: memberId,
+      },
+    });
+
+    res.status(200).json({ message: "Anggota berhasil dihapus", deleted });
+  } catch (error) {
+    console.error("Gagal menghapus anggota:", error);
+    res
+      .status(500)
+      .json({ message: "Terjadi kesalahan saat menghapus anggota" });
   }
 };

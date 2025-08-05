@@ -29,7 +29,7 @@ export default function Auth() {
 
   const redirectByRole = (role) => {
     if (role === "COMMUNITY") {
-      navigate("/community/events");
+      navigate("/community/members");
     } else if (role === "ADMIN") {
       navigate("/admin/dashboard");
     } else {
@@ -102,11 +102,11 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-purple-900 text-white px-4">
       <div className="bg-white/10 p-8 rounded-xl shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-semibold text-center mb-6">
+        <h2 className="text-3xl font-semibold text-center mb-6 orbitron-regular">
           {isLogin ? "Masuk ke Akun" : "Daftar Akun Baru"}
         </h2>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4 oxanium-regular" onSubmit={handleSubmit}>
           {!isLogin && (
             <>
               <input
@@ -163,13 +163,13 @@ export default function Auth() {
 
           <button
             type="submit"
-            className="w-full bg-[#00FFFF] text-black py-2 rounded font-semibold hover:bg-cyan-300 transition"
+            className="w-full bg-[#00FFFF] text-black py-2 rounded font-semibold hover:bg-cyan-300 transition orbitron-regular"
           >
             {isLogin ? "Masuk" : "Daftar"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center">
+        <p className="mt-4 text-sm text-center oxanium-regular">
           {isLogin ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
           <button
             onClick={handleSwitch}
@@ -180,7 +180,7 @@ export default function Auth() {
         </p>
 
         <div className="text-center mt-4">
-          <Link to="/" className="text-sm hover:underline text-gray-300">
+          <Link to="/" className="text-sm hover:underline text-gray-300 oxanium-regular">
             Kembali ke Beranda
           </Link>
         </div>
