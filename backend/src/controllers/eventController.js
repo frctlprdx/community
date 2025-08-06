@@ -96,3 +96,21 @@ exports.getCommunityEvent = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getEventById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const event = await prisma.event.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!event) {
+      return res.status(404).json({ message: "Event tidak ditemukan" });
+    }
+
+    res.status(200).json(event);
+  } catch (error) {
+    console.error("Error get event by ID:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

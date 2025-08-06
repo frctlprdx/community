@@ -31,7 +31,6 @@ export default function CommunityEvents() {
           const res = await axios.get(
             `${import.meta.env.VITE_API_BASE_URL}/event/get/${storedId}`
           );
-          console.log("Data dari API:", res.data);
           setEvents(res.data);
         } catch (err) {
           console.error("Failed to fetch events:", err);
@@ -78,7 +77,7 @@ export default function CommunityEvents() {
           events.map((event) => (
             <div
               key={event.id}
-              className="bg-black/40 border border-purple-500 p-4 rounded shadow oxanium-regular h-[420px] flex flex-col"
+              className="bg-black/40 border border-purple-500 p-4 rounded shadow oxanium-regular h-128 flex flex-col"
             >
               {event.imageUrl && (
                 <img
@@ -93,7 +92,7 @@ export default function CommunityEvents() {
               </h3>
 
               {/* Deskripsi dibatasi 3 baris */}
-              <p className="text-white text-sm mt-1 line-clamp-3 flex-grow">
+              <p className="text-white text-sm mt-1 line-clamp-3 flex-grow mb-5">
                 {event.description}
               </p>
 
@@ -102,6 +101,12 @@ export default function CommunityEvents() {
                 <p className="text-sm text-white">Mulai Pada:</p>
                 <CountdownTimer targetDate={event.date} />
               </div>
+              <Link
+                to={`/community/events/edit/${event.id}`}
+                className="mt-2 inline-block bg-purple-400 text-xl text-center p-4 text-black hover:text-purple-400 hover:bg-gray-900"
+              >
+                Edit Event
+              </Link>
             </div>
           ))
         )}

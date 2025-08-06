@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { supabase } from "../../supabaseClient"; // Pastikan path ini sesuai dengan struktur project Anda
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 export default function AddCommunityEvent() {
   const [title, setTitle] = useState("");
