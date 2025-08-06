@@ -44,6 +44,11 @@ function Navbar() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
+
   return (
     <div className="w-screen bg-transparent">
       <div className="p-4">
@@ -55,26 +60,35 @@ function Navbar() {
               </Link>
             </div>
 
-            { show && (
+            {show && (
               <div className="space-x-6 md:flex hidden">
-              <Link to="/" className="hover:underline text-[#00FFFF] orbitron-regular">
-                Home
-              </Link>
-              <Link to="/gallery" className="hover:underline text-[#00FFFF] orbitron-regular">
-                Galeri
-              </Link>
-              <Link to="/event" className="hover:underline text-[#00FFFF] orbitron-regular">
-                Events
-              </Link>
-              {!isLoggedIn && (
                 <Link
-                  to="/register"
+                  to="/"
                   className="hover:underline text-[#00FFFF] orbitron-regular"
                 >
-                  Daftar
+                  Home
                 </Link>
-              )}
-            </div>
+                <Link
+                  to="/gallery"
+                  className="hover:underline text-[#00FFFF] orbitron-regular"
+                >
+                  Galeri
+                </Link>
+                <Link
+                  to="/event"
+                  className="hover:underline text-[#00FFFF] orbitron-regular"
+                >
+                  Events
+                </Link>
+                {!isLoggedIn && (
+                  <Link
+                    to="/register"
+                    className="hover:underline text-[#00FFFF] orbitron-regular"
+                  >
+                    Daftar
+                  </Link>
+                )}
+              </div>
             )}
 
             <div className="flex items-center gap-4 relative">
@@ -96,20 +110,26 @@ function Navbar() {
 
           {isOpen && (
             <div className="flex flex-col items-center gap-2 px-6 pb-4 md:hidden">
-              <Link to="/" className="hover:underline text-[#00FFFF] oxanium-regular">
+              <Link
+                to="/"
+                className="hover:underline text-[#00FFFF] oxanium-regular"
+              >
                 Home
               </Link>
-              <Link to="/gallery" className="hover:underline text-[#00FFFF] oxanium-regular">
+              <Link
+                to="/gallery"
+                className="hover:underline text-[#00FFFF] oxanium-regular"
+              >
                 Galeri
               </Link>
-              {!isLoggedIn ? (
+              <Link
+                to="/event"
+                className="hover:underline text-[#00FFFF] oxanium-regular"
+              >
+                Events
+              </Link>
+              {role === !true ? (
                 <>
-                  <Link
-                    to="/register"
-                    className="hover:underline text-[#00FFFF] oxanium-regular"
-                  >
-                    Daftar
-                  </Link>
                   <Link
                     to="/loginregister"
                     className="hover:underline text-[#00FFFF] oxanium-regular"
@@ -119,7 +139,6 @@ function Navbar() {
                 </>
               ) : (
                 <>
-                  <span className="text-[#00FFFF]">Hi, {userName}</span>
                   <button
                     onClick={handleLogout}
                     className="text-[#FF6B6B] font-semibold hover:underline"

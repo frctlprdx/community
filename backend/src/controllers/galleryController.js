@@ -105,3 +105,26 @@ exports.updatePost = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getGalleryById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const gallery = await prisma.gallery.findUnique({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    if (!gallery) {
+      return res.status(404).json({ message: "Galeri tidak ditemukan." });
+    }
+
+    res.json(gallery);
+  } catch (error) {
+    console.error("Gagal mengambil galeri:", error);
+    res.status(500).json({
+      message: "Terjadi kesalahan saat mengambil galeri.",
+    });
+  }
+};
