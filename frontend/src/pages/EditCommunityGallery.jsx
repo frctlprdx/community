@@ -21,7 +21,7 @@ export default function EditCommunityGallery() {
     const fetchGallery = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/gallery/get/${galleryId}`
+          `${import.meta.env.VITE_API_BASE_URL}/gallery/getdetail/${galleryId}`
         );
         const gallery = response.data;
 

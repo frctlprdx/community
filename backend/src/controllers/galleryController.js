@@ -32,22 +32,14 @@ exports.createPost = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await prisma.gallery.findMany({
-      include: {
-        community: true,
-      },
-      orderBy: {
-        uploadedAt: "desc",
-      },
-    });
+    const galleries = await prisma.gallery.findMany();
 
-    res.status(200).json({
-      message: "Gallery posts fetched successfully",
-      data: posts,
-    });
+    res.status(200).json(galleries); // ⬅️ langsung kirim array, bukan dibungkus object
   } catch (error) {
-    console.error("Error fetching gallery:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Gagal mengambil galeri:", error);
+    res
+      .status(500)
+      .json({ message: "Terjadi kesalahan saat mengambil galeri." });
   }
 };
 
@@ -110,6 +102,32 @@ exports.getGalleryById = async (req, res) => {
   const { id } = req.params;
 
   try {
+    const galleries = await prisma.gallery.findMany({
+      where: {
+        communityId: parseInt(id),
+      },
+      orderBy: {
+        uploadedAt: "desc", // optional: untuk urutkan terbaru ke lama
+      },
+    });
+
+    res.json({
+      status: "success",
+      data: galleries,
+    });
+  } catch (error) {
+    console.error("❌ Gagal mengambil galeri:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Terjadi kesalahan saat mengambil galeri.",
+    });
+  }
+};
+
+exports.getGalleryDetail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
     const gallery = await prisma.gallery.findUnique({
       where: {
         id: parseInt(id),
@@ -117,14 +135,18 @@ exports.getGalleryById = async (req, res) => {
     });
 
     if (!gallery) {
-      return res.status(404).json({ message: "Galeri tidak ditemukan." });
+      return res.status(404).json({
+        status: "error",
+        message: "Galeri tidak ditemukan",
+      });
     }
 
-    res.json(gallery);
+    res.status(200).json(gallery);
   } catch (error) {
-    console.error("Gagal mengambil galeri:", error);
+    console.error("❌ Gagal mengambil detail galeri:", error);
     res.status(500).json({
-      message: "Terjadi kesalahan saat mengambil galeri.",
+      status: "error",
+      message: "Terjadi kesalahan saat mengambil detail galeri",
     });
   }
 };

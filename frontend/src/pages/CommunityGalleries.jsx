@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Plus, Trash, Eye } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import axios from "axios";
 
 export default function CommunityGalleries() {
@@ -21,19 +21,31 @@ export default function CommunityGalleries() {
       return;
     }
 
-    setRole(storedRole || "");
-    setId(storedId || "");
-    setCommunity(storedName || "");
+    if (!storedId) {
+      console.error("ID tidak ditemukan di localStorage");
+      return;
+    }
 
-    // Fetch gallery posts
+    setRole(storedRole);
+    setId(storedId);
+    setCommunity(storedName);
+
     const fetchGalleries = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/gallery/get`
+          `${import.meta.env.VITE_API_BASE_URL}/gallery/get/${storedId}`
         );
-        setGalleries(res.data.data || []);
+        console.log("✅ Response dari API:", res.data);
+
+        if (Array.isArray(res.data.data)) {
+          setGalleries(res.data.data);
+        } else {
+          console.warn("⚠️ Data galeri bukan array:", res.data.data);
+          setGalleries([]);
+        }
       } catch (err) {
-        console.error("Failed to fetch gallery posts:", err);
+        console.error("❌ Gagal mengambil data galeri:", err);
+        setGalleries([]);
       } finally {
         setLoading(false);
       }
@@ -52,15 +64,13 @@ export default function CommunityGalleries() {
       await axios.delete(
         `${import.meta.env.VITE_API_BASE_URL}/gallery/delete/${postId}`
       );
-      // Refresh daftar gallery setelah delete
-      setGalleries(galleries.filter((post) => post.id !== postId));
+      setGalleries((prev) => prev.filter((post) => post.id !== postId));
     } catch (error) {
-      console.error("Gagal menghapus post:", error);
+      console.error("❌ Gagal menghapus post:", error);
       alert("Gagal menghapus post. Silakan coba lagi.");
     }
   };
 
-  // Fungsi untuk format tanggal
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("id-ID", {
@@ -117,14 +127,12 @@ export default function CommunityGalleries() {
                 </h3>
               </div>
 
-              {/* Deskripsi dibatasi 5 baris */}
               {post.description && (
                 <p className="text-white text-sm mt-1 line-clamp-5 flex-grow mb-3">
                   {post.description}
                 </p>
               )}
 
-              {/* Tanggal upload */}
               <div className="mt-auto text-center space-y-1">
                 <p className="text-xs text-gray-400">
                   Uploaded: {formatDate(post.uploadedAt)}

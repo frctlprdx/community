@@ -8,7 +8,7 @@ export default function CommunityEvents() {
   const [role, setRole] = useState("");
   const [id, setId] = useState("");
   const [community, setCommunity] = useState("");
-  const [events, setEvents] = useState([]);
+  const [ events, setEvents] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {

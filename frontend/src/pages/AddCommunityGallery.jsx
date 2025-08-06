@@ -40,8 +40,9 @@ export default function AddCommunityGallery() {
     e.preventDefault();
     setLoading(true);
 
+    const communityId = localStorage.getItem("id");
+
     try {
-      const communityId = parseInt(localStorage.getItem("id")); // Ambil dari localStorage
       if (!communityId) throw new Error("communityId tidak ditemukan.");
 
       if (!imageFile) {
