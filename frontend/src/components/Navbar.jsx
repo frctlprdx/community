@@ -63,6 +63,9 @@ function Navbar() {
               <Link to="/gallery" className="hover:underline text-[#00FFFF] orbitron-regular">
                 Galeri
               </Link>
+              <Link to="/event" className="hover:underline text-[#00FFFF] orbitron-regular">
+                Events
+              </Link>
               {!isLoggedIn && (
                 <Link
                   to="/register"
@@ -74,7 +77,7 @@ function Navbar() {
             </div>
             )}
 
-            <div className="flex items-center gap-4 relative ">
+            <div className="flex items-center gap-4 relative">
               {role === true ? <UserNav /> : <GuestNav />}
 
               <button

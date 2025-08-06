@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import axios from "axios";
 import CountdownTimer from "../components/countdownTimer";
 
@@ -40,6 +40,24 @@ export default function CommunityEvents() {
       fetchEvents();
     }
   }, [navigate]);
+
+  const handleDelete = async (eventId) => {
+    const confirmDelete = window.confirm(
+      "Apakah kamu yakin ingin menghapus event ini?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/event/delete/${eventId}`
+      );
+      // Refresh daftar event setelah delete
+      setEvents(events.filter((event) => event.id !== eventId));
+    } catch (error) {
+      console.error("Gagal menghapus event:", error);
+      alert("Gagal menghapus event. Silakan coba lagi.");
+    }
+  };
 
   // Fungsi untuk menghitung sisa hari ke tanggal event
   const getDaysLeft = (eventDate) => {
@@ -92,7 +110,7 @@ export default function CommunityEvents() {
               </h3>
 
               {/* Deskripsi dibatasi 3 baris */}
-              <p className="text-white text-sm mt-1 line-clamp-3 flex-grow mb-5">
+              <p className="text-white text-sm mt-1 line-clamp-5 flex-grow mb-5">
                 {event.description}
               </p>
 
@@ -101,12 +119,20 @@ export default function CommunityEvents() {
                 <p className="text-sm text-white">Mulai Pada:</p>
                 <CountdownTimer targetDate={event.date} />
               </div>
-              <Link
-                to={`/community/events/edit/${event.id}`}
-                className="mt-2 inline-block bg-purple-400 text-xl text-center p-4 text-black hover:text-purple-400 hover:bg-gray-900"
-              >
-                Edit Event
-              </Link>
+              <div className="mt-2 flex gap-2">
+                <Link
+                  to={`/community/events/edit/${event.id}`}
+                  className="w-4/5 inline-block bg-purple-400 text-xl text-center p-4 text-black rounded hover:text-purple-400 hover:bg-gray-900"
+                >
+                  Edit Event
+                </Link>
+                <button
+                  onClick={() => handleDelete(event.id)}
+                  className="w-1/5 inline-flex items-center justify-center bg-red-600 text-white text-sm p-3 rounded hover:bg-red-700 transition-all cursor-pointer"
+                >
+                  <Trash size={18} />
+                </button>
+              </div>
             </div>
           ))
         )}

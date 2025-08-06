@@ -12,6 +12,7 @@ import CommunityGalleries from "./pages/CommunityGalleries";
 import CommunityMembers from "./pages/CommunityMember";
 import AddCommunityEvent from "./pages/AddCommunityEvent";
 import EditEvent from "./pages/EditEvent";
+import AllEvents from "./pages/AllEvents";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/event" element={<AllEvents />} />
           <Route path="/loginregister" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
 

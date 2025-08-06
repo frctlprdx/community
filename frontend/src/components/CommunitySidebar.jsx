@@ -14,7 +14,7 @@ export default function CommunitySidebar() {
       {/* Burger Button */}
       <button
         onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 bg-[#1B1B3A] text-white p-2 rounded mt-22"
+        className="fixed top-4 left-4 z-50 bg-[#1B1B3A] text-white p-2 rounded mt-22 cursor-pointer"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>

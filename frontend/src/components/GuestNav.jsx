@@ -4,7 +4,7 @@ function GuestNav() {
   return (
     <Link
       to="/loginregister"
-      className="md:block hidden hover:underline text-[#00FFFF] oxanium-regular"
+      className="md:block hidden hover:underline text-[#00FFFF] oxanium-regular cursor-pointer"
     >
       Login
     </Link>
