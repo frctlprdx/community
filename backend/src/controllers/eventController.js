@@ -79,3 +79,20 @@ exports.updateEvent = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getCommunityEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const events = await prisma.event.findMany({
+      where: {
+        createdById: Number(id), // pastikan tipe number
+      },
+    });
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error("Error getting events:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
