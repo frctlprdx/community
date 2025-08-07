@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CountdownTimer from "../components/countdownTimer";
 
@@ -25,7 +25,7 @@ function Home() {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/gallery/get`
         );
-        console.log("DATA DARI API:", response.data); // ⬅️ DEBUG di console
+        console.log("DATA DARI API:", response.data); 
         setGalleries(response.data);
       } catch (error) {
         console.error("Gagal mengambil data galeri:", error);
@@ -61,9 +61,11 @@ function Home() {
           <p className="text-lg md:text-xl mb-6 text-[#CCCCCC]">
             Tempat berkumpulnya orang-orang dengan visi dan semangat yang sama.
           </p>
-          <button className="cursor-pointer bg-[#8A2BE2] text-[#00FFFF] font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-[#00FFFF] hover:text-[#8A2BE2] transition drop-shadow-[0_0_6px_#8A2BE2] audiowide-regular">
-            Gabung Sekarang
-          </button>
+          <Link to="/register">
+            <button className="cursor-pointer bg-[#8A2BE2] text-[#00FFFF] font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-[#00FFFF] hover:text-[#8A2BE2] transition drop-shadow-[0_0_6px_#8A2BE2] audiowide-regular">
+              Gabung Sekarang
+            </button>
+          </Link>
         </div>
       </section>
 
@@ -119,6 +121,10 @@ function Home() {
       <section className="py-16 px-6 md:px-20 bg-gray-900">
         <div className="max-w-6xl mx-auto flex flex-col gap-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Title */}
+            <h2 className="block sm:hidden text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
+              Upcoming Events
+            </h2>
             {/* Galleries scrollable */}
             <div className="w-full md:w-2/3 overflow-x-auto">
               <div className="flex gap-6 w-max">
@@ -147,7 +153,7 @@ function Home() {
             </div>
 
             {/* Title */}
-            <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
+            <h2 className="hidden sm:block text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
               Upcoming Events
             </h2>
           </div>
@@ -162,9 +168,11 @@ function Home() {
         <p className="mb-6 text-lg text-[#EEEEEE] oxanium-regular">
           Mari jadi bagian dari komunitas yang mendukung pertumbuhanmu.
         </p>
-        <button className="bg-black text-[#00FFFF] font-semibold px-6 py-3 rounded-full border border-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition audiowide-regular">
-          Daftar Sekarang
-        </button>
+        <Link to="/register">
+          <button className="cursor-pointer bg-black text-[#00FFFF] font-semibold px-6 py-3 rounded-full border border-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition audiowide-regular">
+            Daftar Sekarang
+          </button>
+        </Link>
       </section>
 
       {/* Footer */}

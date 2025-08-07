@@ -6,6 +6,7 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { Link, useNavigate } from "react-router-dom";
 import UserNav from "./UserNav";
 import GuestNav from "./GuestNav";
+import logo from "../assets/logo ksc revisi.png";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,8 +55,9 @@ function Navbar() {
       <div className="p-4">
         <nav className="w-full bg-[#8A2BE2]/30 backdrop-blur-md sticky top-0 z-10 md:rounded-full rounded-xl shadow-md">
           <div className="flex justify-between items-center px-6 py-4">
-            <div className="text-xl font-bold">
-              <Link to="/" className="text-2xl text-[#00FFFF] orbitron-regular">
+            <div className="text-xl font-bold flex space-x-2 items-center">
+              <img src={logo} alt="" className="w-12 h-12 rounded-full" />
+              <Link to="/" className="text-3xl text-[#00FFFF] orbitron-regular">
                 Kosuco
               </Link>
             </div>
