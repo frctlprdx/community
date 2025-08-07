@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CountdownTimer from "../components/countdownTimer";
+import TypingLoopText from "../components/TypingLoop";
 
 function Home() {
   const [role, setRole] = useState("");
@@ -25,7 +26,7 @@ function Home() {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/gallery/get`
         );
-        console.log("DATA DARI API:", response.data); 
+        console.log("DATA DARI API:", response.data);
         setGalleries(response.data);
       } catch (error) {
         console.error("Gagal mengambil data galeri:", error);
@@ -55,11 +56,12 @@ function Home() {
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center bg-[#0F0F0F] text-[#00FFFF]">
         <div className="text-center px-6 md:px-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-[0_0_3px_#00FFFF] audiowide-regular">
-            Selamat Datang di Komunitas Kami
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-[0_0_3px_#00FFFF] audiowide-regular typing-text">
+            <TypingLoopText text="Selamat Datang di Kosuco" />
           </h1>
-          <p className="text-lg md:text-xl mb-6 text-[#CCCCCC]">
-            Tempat berkumpulnya orang-orang dengan visi dan semangat yang sama.
+          <p className="text-lg md:text-xl mb-6 text-[#CCCCCC] typing-text">
+            Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
+            sama di bidang pemrograman.
           </p>
           <Link to="/register">
             <button className="cursor-pointer bg-[#8A2BE2] text-[#00FFFF] font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-[#00FFFF] hover:text-[#8A2BE2] transition drop-shadow-[0_0_6px_#8A2BE2] audiowide-regular">
@@ -87,17 +89,12 @@ function Home() {
       <section className="py-16 px-6 md:px-20 bg-[#0F0F0F]">
         <div className="max-w-6xl mx-auto flex flex-col gap-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Title */}
-            <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
-              Kegiatan & Karya
-            </h2>
-
-            {/* Galleries scrollable */}
-            <div className="w-full md:w-2/3 overflow-x-auto">
-              <div className="flex gap-6 w-max">
-                {galleries.map((item) => (
+            {/* Auto-scroll Carousel */}
+            <div className="w-full overflow-hidden">
+              <div className="carousel-scroll">
+                {[...galleries, ...galleries].map((item, index) => (
                   <div
-                    key={item.id}
+                    key={index}
                     className="min-w-[250px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
                   >
                     <img
@@ -120,42 +117,53 @@ function Home() {
 
       <section className="py-16 px-6 md:px-20 bg-gray-900">
         <div className="max-w-6xl mx-auto flex flex-col gap-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Title */}
-            <h2 className="block sm:hidden text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
-              Upcoming Events
-            </h2>
-            {/* Galleries scrollable */}
-            <div className="w-full md:w-2/3 overflow-x-auto">
-              <div className="flex gap-6 w-max">
-                {events.map((item) => (
-                  <div
-                    key={item.id}
-                    className="min-w-[250px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
-                  >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4 space-y-3">
-                      <h3 className="font-semibold text-xl text-[#00FFFF]">
-                        {item.title}
-                      </h3>
-                      <div className="mt-auto text-center text-2xl font-medium text-yellow-400 space-y-1">
-                        <p className="text-sm text-white">Mulai Pada:</p>
-                        <CountdownTimer targetDate={item.date} />
+          {/* Title di tengah atas */}
+          <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center">
+            Upcoming Events
+          </h2>
+
+          {/* Carousel */}
+          <div className="flex items-center justify-center">
+            <div className="w-full overflow-hidden ">
+              <div className="flex w-max carousel-scroll">
+                {[...events, ...events].map((item) => {
+                  const formattedDate = new Date(item.date).toLocaleDateString(
+                    "id-ID",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  );
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="min-w-[250px] mr-2 last:mr-0 rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
+                    >
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-4 space-y-2">
+                        <h3 className="font-semibold text-lg text-[#00FFFF]">
+                          {item.title}
+                        </h3>
+
+                        <p className="text-xs text-white">{formattedDate}</p>
+
+                        <div className="text-center text-lg font-medium text-yellow-400 space-y-1">
+                          <p className="text-xs text-white">Mulai Dalam:</p>
+                          <CountdownTimer targetDate={item.date} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-
-            {/* Title */}
-            <h2 className="hidden sm:block text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
-              Upcoming Events
-            </h2>
           </div>
         </div>
       </section>

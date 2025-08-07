@@ -55,37 +55,42 @@ function Navbar() {
       <div className="p-4">
         <nav className="w-full bg-[#8A2BE2]/30 backdrop-blur-md sticky top-0 z-10 md:rounded-full rounded-xl shadow-md">
           <div className="flex justify-between items-center px-6 py-4">
-            <div className="text-xl font-bold flex space-x-2 items-center">
-              <img src={logo} alt="" className="w-12 h-12 rounded-full" />
-              <Link to="/" className="text-3xl text-[#00FFFF] orbitron-regular">
+            {/* Logo & Brand */}
+            <div className="flex items-center space-x-2 pulse-fast">
+              <img src={logo} alt="Logo" className="w-12 h-12 rounded-full" />
+              <Link
+                to="/"
+                className="text-3xl text-[#00FFFF] font-bold orbitron-regular"
+              >
                 Kosuco
               </Link>
             </div>
 
+            {/* Desktop Nav Links */}
             {show && (
-              <div className="space-x-6 md:flex hidden">
+              <div className="hidden md:flex items-center space-x-6">
                 <Link
                   to="/"
-                  className="hover:underline text-[#00FFFF] orbitron-regular"
+                  className="text-[#00FFFF] orbitron-regular hover:underline hover:opacity-80 transition"
                 >
                   Home
                 </Link>
                 <Link
                   to="/gallery"
-                  className="hover:underline text-[#00FFFF] orbitron-regular"
+                  className="text-[#00FFFF] orbitron-regular hover:underline hover:opacity-80 transition"
                 >
                   Galeri
                 </Link>
                 <Link
                   to="/event"
-                  className="hover:underline text-[#00FFFF] orbitron-regular"
+                  className="text-[#00FFFF] orbitron-regular hover:underline hover:opacity-80 transition"
                 >
                   Events
                 </Link>
                 {!isLoggedIn && (
                   <Link
                     to="/register"
-                    className="hover:underline text-[#00FFFF] orbitron-regular"
+                    className="text-[#00FFFF] orbitron-regular hover:underline hover:opacity-80 transition"
                   >
                     Daftar
                   </Link>
@@ -93,61 +98,56 @@ function Navbar() {
               </div>
             )}
 
+            {/* Right Side Nav (UserNav / GuestNav) + Hamburger */}
             <div className="flex items-center gap-4 relative">
               {role === true ? <UserNav /> : <GuestNav />}
 
+              {/* Hamburger Menu */}
               <button
                 aria-label="Menu"
-                className="md:hidden block text-2xl text-gray-800 cursor-pointer"
+                className="md:hidden block text-2xl text-[#00FFFF] cursor-pointer"
                 onClick={() => setIsOpen(!isOpen)}
               >
-                {isOpen ? (
-                  <IoCloseSharp className="text-[#00FFFF]" />
-                ) : (
-                  <GiHamburgerMenu className="text-[#00FFFF]" />
-                )}
+                {isOpen ? <IoCloseSharp /> : <GiHamburgerMenu />}
               </button>
             </div>
           </div>
 
+          {/* Mobile Dropdown */}
           {isOpen && (
-            <div className="flex flex-col items-center gap-2 px-6 pb-4 md:hidden">
+            <div className="md:hidden flex flex-col items-center gap-3 px-6 pb-4">
               <Link
                 to="/"
-                className="hover:underline text-[#00FFFF] oxanium-regular"
+                className="text-[#00FFFF] oxanium-regular hover:underline hover:opacity-80 transition"
               >
                 Home
               </Link>
               <Link
                 to="/gallery"
-                className="hover:underline text-[#00FFFF] oxanium-regular"
+                className="text-[#00FFFF] oxanium-regular hover:underline hover:opacity-80 transition"
               >
                 Galeri
               </Link>
               <Link
                 to="/event"
-                className="hover:underline text-[#00FFFF] oxanium-regular"
+                className="text-[#00FFFF] oxanium-regular hover:underline hover:opacity-80 transition"
               >
                 Events
               </Link>
-              {role === !true ? (
-                <>
-                  <Link
-                    to="/loginregister"
-                    className="hover:underline text-[#00FFFF] oxanium-regular"
-                  >
-                    Login
-                  </Link>
-                </>
+              {!isLoggedIn ? (
+                <Link
+                  to="/loginregister"
+                  className="text-[#00FFFF] oxanium-regular hover:underline hover:opacity-80 transition"
+                >
+                  Login
+                </Link>
               ) : (
-                <>
-                  <button
-                    onClick={handleLogout}
-                    className="text-[#FF6B6B] font-semibold hover:underline"
-                  >
-                    Logout
-                  </button>
-                </>
+                <button
+                  onClick={handleLogout}
+                  className="text-[#FF6B6B] font-semibold hover:underline"
+                >
+                  Logout
+                </button>
               )}
             </div>
           )}
