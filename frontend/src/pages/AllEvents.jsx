@@ -22,16 +22,6 @@ export default function AllEvents() {
     fetchEvents();
   }, []);
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_API_BASE_URL}/event/delete/${id}`
-      );
-      setEvents(events.filter((event) => event.id !== id));
-    } catch (error) {
-      console.error("Failed to delete event:", error);
-    }
-  };
 
   return (
     <div className="w-full py-4 px-8">

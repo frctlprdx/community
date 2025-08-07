@@ -49,6 +49,8 @@ export default function EditCommunityGallery() {
     e.preventDefault();
     setLoading(true);
 
+    const communityId = localStorage.getItem("id");
+
     try {
       let updatedImageUrl = imageUrl;
 
@@ -81,6 +83,7 @@ export default function EditCommunityGallery() {
         {
           title,
           imageUrl: updatedImageUrl,
+          communityId: communityId
         }
       );
 

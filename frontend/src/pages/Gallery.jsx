@@ -33,7 +33,7 @@ function Gallery() {
         <h2 className="text-4xl font-bold text-center mb-12 text-[#FF00FF] oxanium-regular">
           Galeri Komunitas
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 audiowide-regular h-120">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 audiowide-regular h-80">
           {galleries.map((item) => (
             <div
               key={item.id}

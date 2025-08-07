@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import CountdownTimer from "../components/countdownTimer";
 
 function Home() {
   const [role, setRole] = useState("");
+  const [galleries, setGalleries] = useState([]);
+  const [events, setEvents] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,6 +18,37 @@ function Home() {
       return;
     }
   });
+
+  useEffect(() => {
+    async function fetchGallery() {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/gallery/get`
+        );
+        console.log("DATA DARI API:", response.data); // ⬅️ DEBUG di console
+        setGalleries(response.data);
+      } catch (error) {
+        console.error("Gagal mengambil data galeri:", error);
+      }
+    }
+
+    fetchGallery();
+  }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/event/get`
+        );
+        setEvents(res.data);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   return (
     <div className="w-screen min-h-screen bg-[#0F0F0F] text-[#CCCCCC]">
@@ -48,31 +83,73 @@ function Home() {
 
       {/* Showcase Preview */}
       <section className="py-16 px-6 md:px-20 bg-[#0F0F0F]">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-10 text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular">
-            Kegiatan & Karya
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
-              >
-                <img
-                  src={`/images/kegiatan${i}.jpg`}
-                  alt={`Kegiatan ${i}`}
-                  className="w-full h-48 object-cover grayscale hover:grayscale-0 transition"
-                />
-                <div className="p-4">
-                  <h3 className="font-semibold text-xl text-[#00FFFF]">
-                    Judul Kegiatan {i}
-                  </h3>
-                  <p className="text-[#CCCCCC] text-sm">
-                    Deskripsi singkat tentang kegiatan ke-{i} dalam komunitas.
-                  </p>
-                </div>
+        <div className="max-w-6xl mx-auto flex flex-col gap-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Title */}
+            <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
+              Kegiatan & Karya
+            </h2>
+
+            {/* Galleries scrollable */}
+            <div className="w-full md:w-2/3 overflow-x-auto">
+              <div className="flex gap-6 w-max">
+                {galleries.map((item) => (
+                  <div
+                    key={item.id}
+                    className="min-w-[250px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
+                  >
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-4">
+                      <h3 className="font-semibold text-xl text-[#00FFFF]">
+                        {item.title}
+                      </h3>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 px-6 md:px-20 bg-gray-900">
+        <div className="max-w-6xl mx-auto flex flex-col gap-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Galleries scrollable */}
+            <div className="w-full md:w-2/3 overflow-x-auto">
+              <div className="flex gap-6 w-max">
+                {events.map((item) => (
+                  <div
+                    key={item.id}
+                    className="min-w-[250px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
+                  >
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-4 space-y-3">
+                      <h3 className="font-semibold text-xl text-[#00FFFF]">
+                        {item.title}
+                      </h3>
+                      <div className="mt-auto text-center text-2xl font-medium text-yellow-400 space-y-1">
+                        <p className="text-sm text-white">Mulai Pada:</p>
+                        <CountdownTimer targetDate={item.date} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center md:text-left md:w-1/3">
+              Upcoming Events
+            </h2>
           </div>
         </div>
       </section>
