@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import CountdownTimer from "../components/countdownTimer";
 import TypingLoopText from "../components/TypingLoop";
+import Footer from "../components/Footer";
 
 function Home() {
   const [role, setRole] = useState("");
@@ -56,10 +57,14 @@ function Home() {
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center bg-[#0F0F0F] text-[#00FFFF]">
         <div className="text-center px-6 md:px-12">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-[0_0_3px_#00FFFF] audiowide-regular typing-text">
+          <h1 className="text-3xl md:text-6xl font-bold mb-4 drop-shadow-[0_0_3px_#00FFFF] audiowide-regular typing-text">
             <TypingLoopText text="Selamat Datang di Kosuco" />
           </h1>
-          <p className="text-lg md:text-xl mb-6 text-[#CCCCCC] typing-text">
+          <p className="hidden sm:block text-sm md:text-xl mb-6 text-[#CCCCCC] typing-text">
+            Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
+            sama di bidang pemrograman.
+          </p>
+          <p className="block sm:hidden text-sm md:text-xl mb-6 text-[#CCCCCC]">
             Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
             sama di bidang pemrograman.
           </p>
@@ -183,10 +188,7 @@ function Home() {
         </Link>
       </section>
 
-      {/* Footer */}
-      <footer className="py-6 text-center text-sm text-[#AAAAAA] bg-[#1A1A1A] border-t border-[#333] orbitron-regular">
-        &copy; {new Date().getFullYear()} Komunitas Kita. All rights reserved.
-      </footer>
+      <Footer />
     </div>
   );
 }

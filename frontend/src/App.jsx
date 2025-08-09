@@ -15,10 +15,36 @@ import EditEvent from "./pages/EditEvent";
 import AllEvents from "./pages/AllEvents";
 import AddCommunityGallery from "./pages/AddCommunityGallery";
 import EditCommunityGallery from "./pages/EditCommunityGallery";
+import { useEffect, useRef } from "react";
+
+// backsound taruh di folder public, panggil pakai path
+const backsound = "/neon-dreams-90s-synthwave-344049.mp3";
 
 function App() {
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    audio.volume = 0.35; // volume 20%
+
+    // Trigger play saat user pertama kali klik
+    const handleUserInteraction = () => {
+      audio.play().catch((err) => console.log("Autoplay diblokir:", err));
+      document.removeEventListener("click", handleUserInteraction);
+    };
+
+    document.addEventListener("click", handleUserInteraction);
+
+    return () => {
+      document.removeEventListener("click", handleUserInteraction);
+    };
+  }, []);
+
   return (
     <Router>
+      {/* Audio tag, loop agar musik terus berjalan */}
+      <audio ref={audioRef} src={backsound} loop preload="auto" />
+
       <div className="min-h-screen w-screen">
         <div className="sticky top-0 z-50">
           <Navbar />

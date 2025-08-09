@@ -75,6 +75,7 @@ export default function Auth() {
           {
             email: formData.email,
             password: formData.password,
+            
           }
         );
 

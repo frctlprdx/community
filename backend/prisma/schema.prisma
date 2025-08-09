@@ -25,6 +25,7 @@ model User {
   createdAt DateTime @default(now())
 
   communityMemberships CommunityMember[]
+  loginHistories    LoginHistory[]   // relasi ke history login
 
   @@map("users")
 }
@@ -80,6 +81,16 @@ model CommunityMember {
 
   @@unique([userId, communityId])
   @@map("community_members")
+}
+
+model LoginHistory {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  loginAt    DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("login_history")
 }
 
 enum Role {
