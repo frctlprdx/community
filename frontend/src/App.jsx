@@ -15,6 +15,7 @@ import EditEvent from "./pages/EditEvent";
 import AllEvents from "./pages/AllEvents";
 import AddCommunityGallery from "./pages/AddCommunityGallery";
 import EditCommunityGallery from "./pages/EditCommunityGallery";
+import LoginHistory from "./pages/LoginHistory";
 import { useEffect, useRef } from "react";
 
 // backsound taruh di folder public, panggil pakai path
@@ -25,7 +26,7 @@ function App() {
 
   useEffect(() => {
     const audio = audioRef.current;
-    audio.volume = 0.35; // volume 20%
+    audio.volume = 0.0; // volume 20%
 
     // Trigger play saat user pertama kali klik
     const handleUserInteraction = () => {
@@ -62,9 +63,13 @@ function App() {
             <Route path="events/add" element={<AddCommunityEvent />} />
             <Route path="galleries/add" element={<AddCommunityGallery />} />
             <Route path="events/edit/:eventId" element={<EditEvent />} />
-            <Route path="gallery/edit/:galleryId" element={<EditCommunityGallery />} />
+            <Route
+              path="gallery/edit/:galleryId"
+              element={<EditCommunityGallery />}
+            />
             <Route path="galleries" element={<CommunityGalleries />} />
             <Route path="members" element={<CommunityMembers />} />
+            <Route path="historylogin" element={<LoginHistory />} />
           </Route>
         </Routes>
       </div>

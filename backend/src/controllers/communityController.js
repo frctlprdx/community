@@ -259,3 +259,23 @@ exports.deleteMember = async (req, res) => {
       .json({ message: "Terjadi kesalahan saat menghapus anggota" });
   }
 };
+
+exports.getHistoryLogin = async (req, res) => {
+  try {
+    const history = await prisma.loginHistory.findMany({
+      orderBy: { loginAt: "desc" },
+      include: {
+        user: {
+          select: { name: true, email: true, role: true },
+        },
+      },
+    });
+
+    res.status(200).json(history);
+  } catch (err) {
+    res.status(500).json({
+      message: "Gagal mengambil data login history",
+      error: err.message,
+    });
+  }
+};

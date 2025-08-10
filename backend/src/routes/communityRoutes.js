@@ -9,5 +9,6 @@ router.delete("/member/:id", communityController.deleteMember); //Delete Member 
 router.post("/join", communityController.joinCommunity);//Join Community (Member)
 router.delete("/delete/:id", communityController.deleteCommunity);//Delete Community (Admin)
 router.put("/update/:id", communityController.updateCommunity);
+router.get("/gethistory", communityController.getHistoryLogin)
 
 module.exports = router;

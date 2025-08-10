@@ -27,6 +27,13 @@ export default function CommunitySidebar() {
         <h2 className="text-2xl text-[#00FFFF] font-bold mb-6">Komunitas</h2>
         <nav className="flex flex-col gap-4">
           <Link
+            to="/community/historylogin"
+            className="hover:bg-[#8A2BE2] p-2 rounded transition duration-200 text-[#00FFFF]"
+            onClick={() => setIsOpen(false)}
+          >
+            History Login
+          </Link>
+          <Link
             to="/community/members"
             className="hover:bg-[#8A2BE2] p-2 rounded transition duration-200 text-[#00FFFF]"
             onClick={() => setIsOpen(false)}

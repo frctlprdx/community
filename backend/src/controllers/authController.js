@@ -59,13 +59,15 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Password salah" });
     }
 
-    // Simpan login history
-    await prisma.loginHistory.create({
-      data: {
-        userId: user.id,
-        loginAt: new Date(),
-      },
-    });
+    // Cek role sebelum simpan login history
+    if (user.role === "MEMBER") {
+      await prisma.loginHistory.create({
+        data: {
+          userId: user.id,
+          loginAt: new Date(),
+        },
+      });
+    }
 
     // Jika sukses, kirim info user
     res.status(200).json({ message: "Login berhasil", user });
