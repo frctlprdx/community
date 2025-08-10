@@ -26,6 +26,7 @@ model User {
 
   communityMemberships CommunityMember[]
   loginHistories    LoginHistory[]   // relasi ke history login
+  applyEvents       ApplyEvent[]     // relasi ke ApplyEvent
 
   @@map("users")
 }
@@ -38,6 +39,7 @@ model Community {
   galleries Gallery[] @relation("CommunityGallery")
   events    Event[]   @relation("EventCreator")
   communityMemberships CommunityMember[]
+  applyEvents ApplyEvent[] // opposite relation for ApplyEvent
 
   @@map("communities")
 }
@@ -92,6 +94,21 @@ model LoginHistory {
 
   @@map("login_history")
 }
+
+model ApplyEvent {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  communityId Int
+  title       String
+  appliedAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+  community   Community @relation(fields: [communityId], references: [id])
+
+  @@unique([userId, communityId, title]) // optional, mencegah user submit event yang sama di komunitas yang sama
+  @@map("apply_event")
+}
+
 
 enum Role {
   ADMIN

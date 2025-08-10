@@ -279,3 +279,85 @@ exports.getHistoryLogin = async (req, res) => {
     });
   }
 };
+
+exports.applyEvent = async (req, res) => {
+  const { userId, communityId, title } = req.body;
+
+  if (!userId || !communityId || !title) {
+    return res.status(400).json({ message: "Data tidak lengkap" });
+  }
+
+  try {
+    // Cek apakah sudah ada pengajuan yang sama
+    const existing = await prisma.applyEvent.findFirst({
+      where: {
+        userId: parseInt(userId),
+        communityId: parseInt(communityId),
+        title: title,
+      },
+    });
+
+    if (existing) {
+      return res.status(400).json({ message: "Pengajuan event ini sudah ada" });
+    }
+
+    // Simpan ke tabel apply_event
+    const newApply = await prisma.applyEvent.create({
+      data: {
+        userId: parseInt(userId),
+        communityId: parseInt(communityId),
+        title,
+      },
+    });
+
+    res
+      .status(201)
+      .json({ message: "Pengajuan event berhasil", data: newApply });
+  } catch (error) {
+    console.error("Error apply event:", error);
+    res
+      .status(500)
+      .json({ message: "Terjadi kesalahan", error: error.message });
+  }
+};
+
+exports.getAppliedEvents = async (req, res) => {
+  try {
+    const appliedEvents = await prisma.applyEvent.findMany({
+      include: {
+        user: true,
+        community: true, // ambil info komunitas
+      },
+      orderBy: {
+        appliedAt: "desc",
+      },
+    });
+    res.status(200).json(appliedEvents);
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal mengambil data applied events",
+      error: error.message,
+    });
+  }
+};
+
+exports.deleteAppliedEvent = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedEvent = await prisma.applyEvent.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.status(200).json({
+      message: "Pendaftaran berhasil dihapus",
+      deletedEvent,
+    });
+  } catch (error) {
+    console.error("Gagal menghapus pendaftaran:", error);
+    res.status(500).json({
+      message: "Gagal menghapus pendaftaran",
+      error: error.message,
+    });
+  }
+};

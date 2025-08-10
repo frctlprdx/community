@@ -16,6 +16,8 @@ import AllEvents from "./pages/AllEvents";
 import AddCommunityGallery from "./pages/AddCommunityGallery";
 import EditCommunityGallery from "./pages/EditCommunityGallery";
 import LoginHistory from "./pages/LoginHistory";
+import ApplyEvent from "./pages/ApplyEvent";
+import AppliedEventCommunity from "./pages/AppliedEventCommunity";
 import { useEffect, useRef } from "react";
 
 // backsound taruh di folder public, panggil pakai path
@@ -57,6 +59,7 @@ function App() {
           <Route path="/event" element={<AllEvents />} />
           <Route path="/loginregister" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/appliedevent" element={<ApplyEvent />} />
 
           <Route path="/community" element={<CommunityLayout />}>
             <Route path="events" element={<CommunityEvents />} />
@@ -70,6 +73,7 @@ function App() {
             <Route path="galleries" element={<CommunityGalleries />} />
             <Route path="members" element={<CommunityMembers />} />
             <Route path="historylogin" element={<LoginHistory />} />
+            <Route path="appliedevent" element={<AppliedEventCommunity />} />
           </Route>
         </Routes>
       </div>

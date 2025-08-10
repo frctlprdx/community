@@ -54,6 +54,13 @@ export default function CommunitySidebar() {
           >
             Galeri
           </Link>
+          <Link
+            to="/community/appliedevent"
+            className="hover:bg-[#8A2BE2] p-2 rounded transition duration-200 text-[#00FFFF]"
+            onClick={() => setIsOpen(false)}
+          >
+            Pengajuan Event
+          </Link>
         </nav>
       </aside>
 

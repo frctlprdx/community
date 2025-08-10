@@ -181,7 +181,7 @@ function Home() {
         <p className="mb-6 text-lg text-[#EEEEEE] oxanium-regular">
           Mari jadi bagian dari komunitas yang mendukung pertumbuhanmu.
         </p>
-        <Link to="/register">
+        <Link to="/appliedevent">
           <button className="cursor-pointer bg-black text-[#00FFFF] font-semibold px-6 py-3 rounded-full border border-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition audiowide-regular">
             Daftar Sekarang
           </button>
