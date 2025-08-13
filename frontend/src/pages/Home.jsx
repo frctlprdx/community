@@ -4,6 +4,7 @@ import axios from "axios";
 import CountdownTimer from "../components/countdownTimer";
 import TypingLoopText from "../components/TypingLoop";
 import Footer from "../components/Footer";
+import Background3D from "../components/Background3D";
 
 function Home() {
   const [role, setRole] = useState("");
@@ -53,142 +54,150 @@ function Home() {
   }, []);
 
   return (
-    <div className="w-screen min-h-screen bg-[#0F0F0F] text-[#CCCCCC]">
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center bg-[#0F0F0F] text-[#00FFFF]">
-        <div className="text-center px-6 md:px-12">
-          <h1 className="text-3xl md:text-6xl font-bold mb-4 drop-shadow-[0_0_3px_#00FFFF] audiowide-regular typing-text">
-            <TypingLoopText text="Selamat Datang di Kosuco" />
-          </h1>
-          <p className="hidden sm:block text-sm md:text-xl mb-6 text-[#CCCCCC] typing-text">
-            Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
-            sama di bidang pemrograman.
-          </p>
-          <p className="block sm:hidden text-sm md:text-xl mb-6 text-[#CCCCCC]">
-            Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
-            sama di bidang pemrograman.
-          </p>
-          <Link to="/register">
-            <button className="cursor-pointer bg-[#8A2BE2] text-[#00FFFF] font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-[#00FFFF] hover:text-[#8A2BE2] transition drop-shadow-[0_0_6px_#8A2BE2] audiowide-regular">
-              Gabung Sekarang
-            </button>
-          </Link>
-        </div>
-      </section>
+    <div className="w-screen min-h-screen bg-[#0F0F0F] text-[#CCCCCC] relative">
+      {/* Background 3D - Fixed position covering entire page */}
+      <div className="fixed inset-0 z-0">
+        <Background3D />
+      </div>
 
-      {/* Tentang Kami */}
-      <section className="py-16 px-6 md:px-20 bg-[#1A1A1A]">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4 text-[#00FFFF] drop-shadow-[0_0_5px_#00FFFF] oxanium-regular">
-            Tentang Kami
-          </h2>
-          <p className="text-[#AAAAAA] leading-relaxed audiowide-regular">
-            Kami adalah komunitas yang fokus pada pengembangan diri, kolaborasi,
-            dan berbagi pengetahuan. Di sini, kamu bisa belajar hal baru, ikut
-            proyek seru, dan bertemu dengan orang-orang hebat.
-          </p>
-        </div>
-      </section>
-
-      {/* Showcase Preview */}
-      <section className="py-16 px-6 md:px-20 bg-[#0F0F0F]">
-        <div className="max-w-6xl mx-auto flex flex-col gap-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Auto-scroll Carousel */}
-            <div className="w-full overflow-hidden">
-              <div className="carousel-scroll">
-                {[...galleries, ...galleries].map((item, index) => (
-                  <div
-                    key={index}
-                    className="min-w-[250px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
-                  >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="font-semibold text-xl text-[#00FFFF]">
-                        {item.title}
-                      </h3>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* Content wrapper with relative positioning */}
+      <div className="relative z-10">
+        {/* Hero Section */}
+        <section className="relative h-screen flex items-center justify-center text-[#00FFFF] overflow-hidden">
+          {/* Konten utama */}
+          <div className="text-center px-6 md:px-12">
+            <h1 className="text-3xl md:text-6xl font-bold mb-4 drop-shadow-[0_0_3px_#00FFFF] audiowide-regular typing-text">
+              <TypingLoopText text="Selamat Datang di Kosuco" />
+            </h1>
+            <p className="hidden sm:block text-sm md:text-xl mb-6 text-[#CCCCCC] typing-text">
+              Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
+              sama di bidang pemrograman.
+            </p>
+            <p className="block sm:hidden text-sm md:text-xl mb-6 text-[#CCCCCC]">
+              Tempat berkumpulnya orang-orang dengan hobi dan ketertarikan yang
+              sama di bidang pemrograman.
+            </p>
+            <Link to="/register">
+              <button className="cursor-pointer bg-[#8A2BE2] text-[#00FFFF] font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-[#00FFFF] hover:text-[#8A2BE2] transition drop-shadow-[0_0_6px_#8A2BE2] audiowide-regular">
+                Gabung Sekarang
+              </button>
+            </Link>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="py-16 px-6 md:px-20 bg-gray-900">
-        <div className="max-w-6xl mx-auto flex flex-col gap-10">
-          {/* Title di tengah atas */}
-          <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center">
-            Upcoming Events
-          </h2>
+        {/* Tentang Kami */}
+        <section className="py-16 px-6 md:px-20 bg-[#1A1A1A]/80 backdrop-blur-sm">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-4 text-[#00FFFF] drop-shadow-[0_0_5px_#00FFFF] oxanium-regular">
+              Tentang Kami
+            </h2>
+            <p className="text-[#AAAAAA] leading-relaxed audiowide-regular">
+              Kami adalah komunitas yang fokus pada pengembangan diri,
+              kolaborasi, dan berbagi pengetahuan. Di sini, kamu bisa belajar
+              hal baru, ikut proyek seru, dan bertemu dengan orang-orang hebat.
+            </p>
+          </div>
+        </section>
 
-          {/* Carousel */}
-          <div className="flex items-center justify-center">
-            <div className="w-full overflow-hidden ">
-              <div className="flex w-max carousel-scroll">
-                {[...events, ...events].map((item) => {
-                  const formattedDate = new Date(item.date).toLocaleDateString(
-                    "id-ID",
-                    {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
-                  );
-
-                  return (
+        {/* Showcase Preview */}
+        <section className="py-16 px-6 md:px-20 bg-[#0F0F0F]/80 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto flex flex-col gap-10">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              {/* Auto-scroll Carousel */}
+              <div className="w-full overflow-hidden">
+                <div className="carousel-scroll">
+                  {[...galleries, ...galleries].map((item, index) => (
                     <div
-                      key={item.id}
-                      className="min-w-[250px] mr-2 last:mr-0 rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A] border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
+                      key={index}
+                      className="min-w-[250px] rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A]/90 backdrop-blur-sm border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
                     >
                       <img
                         src={item.imageUrl}
                         alt={item.title}
                         className="w-full h-48 object-cover"
                       />
-                      <div className="p-4 space-y-2">
-                        <h3 className="font-semibold text-lg text-[#00FFFF]">
+                      <div className="p-4">
+                        <h3 className="font-semibold text-xl text-[#00FFFF]">
                           {item.title}
                         </h3>
-
-                        <p className="text-xs text-white">{formattedDate}</p>
-
-                        <div className="text-center text-lg font-medium text-yellow-400 space-y-1">
-                          <p className="text-xs text-white">Mulai Dalam:</p>
-                          <CountdownTimer targetDate={item.date} />
-                        </div>
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-[#8A2BE2] to-[#FF00FF] text-white text-center px-6">
-        <h2 className="text-3xl font-bold mb-4 drop-shadow-[0_0_10px_#FFFFFF] oxanium-regular">
-          Tertarik Bergabung?
-        </h2>
-        <p className="mb-6 text-lg text-[#EEEEEE] oxanium-regular">
-          Mari jadi bagian dari komunitas yang mendukung pertumbuhanmu.
-        </p>
-        <Link to="/appliedevent">
-          <button className="cursor-pointer bg-black text-[#00FFFF] font-semibold px-6 py-3 rounded-full border border-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition audiowide-regular">
-            Daftar Sekarang
-          </button>
-        </Link>
-      </section>
+        <section className="py-16 px-6 md:px-20 bg-gray-900/80 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto flex flex-col gap-10">
+            {/* Title di tengah atas */}
+            <h2 className="text-3xl font-bold text-[#FF00FF] drop-shadow-[0_0_3px_#FF00FF] oxanium-regular text-center">
+              Upcoming Events
+            </h2>
 
-      <Footer />
+            {/* Carousel */}
+            <div className="flex items-center justify-center">
+              <div className="w-full overflow-hidden ">
+                <div className="flex w-max carousel-scroll">
+                  {[...events, ...events].map((item) => {
+                    const formattedDate = new Date(
+                      item.date
+                    ).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    });
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="min-w-[250px] mr-2 last:mr-0 rounded-xl overflow-hidden shadow-lg bg-[#1A1A1A]/90 backdrop-blur-sm border border-[#8A2BE2] hover:shadow-[0_0_10px_#8A2BE2] transition audiowide-regular"
+                      >
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-4 space-y-2">
+                          <h3 className="font-semibold text-lg text-[#00FFFF]">
+                            {item.title}
+                          </h3>
+
+                          <p className="text-xs text-white">{formattedDate}</p>
+
+                          <div className="text-center text-lg font-medium text-yellow-400 space-y-1">
+                            <p className="text-xs text-white">Mulai Dalam:</p>
+                            <CountdownTimer targetDate={item.date} />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Call to Action */}
+        <section className="py-20 bg-gradient-to-r from-[#8A2BE2]/90 to-[#FF00FF]/90 backdrop-blur-sm text-white text-center px-6">
+          <h2 className="text-3xl font-bold mb-4 drop-shadow-[0_0_10px_#FFFFFF] oxanium-regular">
+            Tertarik Bergabung?
+          </h2>
+          <p className="mb-6 text-lg text-[#EEEEEE] oxanium-regular">
+            Mari jadi bagian dari komunitas yang mendukung pertumbuhanmu.
+          </p>
+          <Link to="/appliedevent">
+            <button className="cursor-pointer bg-black/80 backdrop-blur-sm text-[#00FFFF] font-semibold px-6 py-3 rounded-full border border-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition audiowide-regular">
+              Daftar Sekarang
+            </button>
+          </Link>
+        </section>
+
+        <Footer />
+      </div>
     </div>
   );
 }
