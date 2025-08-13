@@ -184,14 +184,14 @@ function Home() {
         {/* Call to Action */}
         <section className="py-20 bg-gradient-to-r from-[#8A2BE2]/90 to-[#FF00FF]/90 backdrop-blur-sm text-white text-center px-6">
           <h2 className="text-3xl font-bold mb-4 drop-shadow-[0_0_10px_#FFFFFF] oxanium-regular">
-            Tertarik Bergabung?
+            Ingin Mengajukan Event ?
           </h2>
           <p className="mb-6 text-lg text-[#EEEEEE] oxanium-regular">
-            Mari jadi bagian dari komunitas yang mendukung pertumbuhanmu.
+            Ajukan Eventmu untuk berkolaborasi dengan komunitas kami!
           </p>
           <Link to="/appliedevent">
             <button className="cursor-pointer bg-black/80 backdrop-blur-sm text-[#00FFFF] font-semibold px-6 py-3 rounded-full border border-[#00FFFF] hover:bg-[#00FFFF] hover:text-black transition audiowide-regular">
-              Daftar Sekarang
+              Ajukan Sekarang!
             </button>
           </Link>
         </section>

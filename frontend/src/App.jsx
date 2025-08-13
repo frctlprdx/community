@@ -28,7 +28,7 @@ function App() {
 
   useEffect(() => {
     const audio = audioRef.current;
-    audio.volume = 0.0; // volume 20%
+    audio.volume = 0.3; // volume 20%
 
     // Trigger play saat user pertama kali klik
     const handleUserInteraction = () => {
