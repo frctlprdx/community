@@ -30,9 +30,10 @@ model User {
 
 model Community {
   id          Int       @id @default(autoincrement())
-  name        String
+  name        String    @unique // tambahkan unique constraint
   category    String?
   socialLink  String?
+  memberCount Int       @default(0) // field baru untuk menghitung member
   createdAt   DateTime  @default(now())
 
   galleries   Gallery[] @relation("CommunityGallery")
@@ -75,12 +76,13 @@ model CommunityMember {
   id          Int       @id @default(autoincrement())
   userId      Int
   communityId Int
+  role        String    @default("MEMBER") // bisa "ADMIN", "MODERATOR", "MEMBER"
   joinedAt    DateTime  @default(now())
 
-  user        User      @relation(fields: [userId], references: [id])
-  community   Community @relation(fields: [communityId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, communityId])
+  @@unique([userId, communityId]) // prevent duplicate membership
   @@map("community_members")
 }
 

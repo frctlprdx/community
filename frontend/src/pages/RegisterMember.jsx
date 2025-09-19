@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { User, Mail, Phone, Lock, FileText, Camera } from "lucide-react";
+import { User, Mail, Phone, Lock, FileText, Camera, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+// Note: You'll need to install axios in your project: npm install axios
+// import axios from "axios";
 
 export default function RegisterMember() {
   const [formData, setFormData] = useState({
@@ -11,23 +13,135 @@ export default function RegisterMember() {
     profilePicture: null,
   });
 
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [message, setMessage] = useState("");
+
   const handleChange = (e) => {
-    if (e.target.name === "profilePicture") {
-      setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+    const { name, value, files } = e.target;
+    
+    if (name === "profilePicture") {
+      setFormData({ ...formData, [name]: files[0] });
     } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+      setFormData({ ...formData, [name]: value });
+    }
+
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null });
     }
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Nama wajib diisi";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email wajib diisi";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Format email tidak valid";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password wajib diisi";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password minimal 8 karakter";
+    }
+
+    if (formData.phone_number && !/^[0-9+\-\s()]+$/.test(formData.phone_number)) {
+      newErrors.phone_number = "Format nomor telepon tidak valid";
+    }
+
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    alert("Pendaftaran member berhasil! (Demo mode)");
+    setIsLoading(true);
+    setErrors({});
+    setMessage("");
+    setIsSuccess(false);
+
+    // Client-side validation
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Prepare data for submission
+      const submitData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password,
+        phone_number: formData.phone_number.trim() || undefined,
+        bio: formData.bio.trim() || undefined,
+        profilePicture: null // For now, keep as null as requested
+      };
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/registermember`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submitData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setIsSuccess(true);
+        setMessage(data.message);
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone_number: "",
+          password: "",
+          bio: "",
+          profilePicture: null,
+        });
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      }
+
+    } catch (error) {
+      console.error("Registration error:", error);
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+      } else {
+        try {
+          const errorData = await error.response?.json();
+          const { message, errors: serverErrors } = errorData || {};
+          setMessage(message || "Terjadi kesalahan saat mendaftar");
+          
+          if (serverErrors) {
+            setErrors(serverErrors);
+          }
+        } catch {
+          setMessage("Terjadi kesalahan tidak terduga. Silakan coba lagi.");
+        }
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Add padding top to avoid navbar overlap */}
       <div className="pt-20 pb-12 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
@@ -39,6 +153,27 @@ export default function RegisterMember() {
             <p className="text-gray-600 text-lg">Bergabunglah dengan komunitas dan dapatkan akses ke berbagai kegiatan menarik</p>
           </div>
 
+          {/* Success Message */}
+          {isSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="flex items-center">
+                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                <p className="text-green-800 font-medium">{message}</p>
+              </div>
+              <p className="text-green-600 text-sm mt-1">Anda akan diarahkan ke halaman login...</p>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {message && !isSuccess && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                <p className="text-red-800 font-medium">{message}</p>
+              </div>
+            </div>
+          )}
+
           {/* Main Content */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="p-8 lg:p-12">
@@ -48,7 +183,7 @@ export default function RegisterMember() {
                     {/* Nama Lengkap */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Nama Lengkap
+                        Nama Lengkap <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -58,16 +193,21 @@ export default function RegisterMember() {
                           value={formData.name}
                           onChange={handleChange}
                           placeholder="Masukkan nama lengkap"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.name ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
+                          disabled={isLoading}
                         />
                       </div>
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      )}
                     </div>
 
                     {/* Email */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Email
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -77,10 +217,15 @@ export default function RegisterMember() {
                           value={formData.email}
                           onChange={handleChange}
                           placeholder="contoh@email.com"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
+                          disabled={isLoading}
                         />
                       </div>
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      )}
                     </div>
                   </div>
 
@@ -98,16 +243,21 @@ export default function RegisterMember() {
                           value={formData.phone_number}
                           onChange={handleChange}
                           placeholder="08xxxxxxxxxx"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.phone_number ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
+                          disabled={isLoading}
                         />
                       </div>
+                      {errors.phone_number && (
+                        <p className="mt-1 text-sm text-red-600">{errors.phone_number}</p>
+                      )}
                     </div>
 
                     {/* Kata Sandi */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Kata Sandi
+                        Kata Sandi <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -117,10 +267,15 @@ export default function RegisterMember() {
                           value={formData.password}
                           onChange={handleChange}
                           placeholder="Minimal 8 karakter"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.password ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
+                          disabled={isLoading}
                         />
                       </div>
+                      {errors.password && (
+                        <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                      )}
                     </div>
                   </div>
 
@@ -138,6 +293,7 @@ export default function RegisterMember() {
                         placeholder="Ceritakan sedikit tentang diri Anda..."
                         rows="4"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-gray-50"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -160,11 +316,13 @@ export default function RegisterMember() {
                             onChange={handleChange}
                             accept="image/*"
                             className="hidden"
+                            disabled={isLoading}
                           />
                         </label>
                         <p className="mt-1">atau drag and drop</p>
                       </div>
                       <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                      <p className="text-xs text-gray-400 mt-1">(Fitur upload foto akan segera tersedia)</p>
                     </div>
                   </div>
 
@@ -172,9 +330,22 @@ export default function RegisterMember() {
                   <div className="pt-6">
                     <button
                       onClick={handleSubmit}
-                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
+                      disabled={isLoading || isSuccess}
+                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
                     >
-                      Daftar Member
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                          Mendaftar...
+                        </>
+                      ) : isSuccess ? (
+                        <>
+                          <CheckCircle className="h-5 w-5 mr-2" />
+                          Berhasil Terdaftar!
+                        </>
+                      ) : (
+                        'Daftar Member'
+                      )}
                     </button>
                   </div>
                 </div>
