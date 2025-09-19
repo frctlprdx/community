@@ -23,61 +23,65 @@ function Gallery() {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-white">Memuat galeri...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600 text-lg">Memuat galeri...</p>
+      </div>
+    );
   }
 
-  const chunkArray = (arr, size) => {
-    const chunked = [];
-    for (let i = 0; i < arr.length; i += size) {
-      chunked.push(arr.slice(i, i + size));
-    }
-    return chunked;
-  };
-
   return (
-    <section className="min-h-screen bg-gradient-to-br from-[#0F0F0F] to-[#24243e] text-white py-12 px-6">
-      <div className="container mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12 text-[#FF00FF] oxanium-regular">
-          Galeri Komunitas
-        </h2>
-
-        {/* Carousel per 3 item */}
-        <div className="space-y-10">
-          {chunkArray(galleries, 3).map((group, groupIndex) => (
-            <div
-              key={groupIndex}
-              className="overflow-hidden w-full relative"
-            >
-              <div
-                className="flex gap-8 w-max px-1 animate-slide"
-                style={{
-                  animation: "scroll-left 20s linear infinite",
-                }}
-              >
-                {group.map((item) => (
-                  <div
-                    key={item.id}
-                    className="min-w-[300px] bg-[#1a1a2e] rounded-xl overflow-hidden shadow-lg hover:shadow-cyan-500/40 transition-all duration-300 border border-pink-500 hover:scale-105"
-                  >
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="w-full h-64 object-cover brightness-90 hover:brightness-110 transition-all duration-300"
-                    />
-                    <div className="p-5 audiowide-regular">
-                      <h3 className="text-xl font-semibold text-cyan-300">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-purple-400">{item.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+    <section className="min-h-screen bg-gray-50 py-30 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Judul */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+            Galeri Komunitas
+          </h2>
+          <div className="w-24 h-1 bg-indigo-600 mx-auto mb-6"></div>
+          <p className="text-lg text-gray-600">
+            Dokumentasi momen berharga dari berbagai komunitas di Kota Semarang
+          </p>
         </div>
-      </div>
 
+        {/* Card Galeri */}
+        {galleries.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {galleries.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-gray-100"
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="w-full h-56 object-cover"
+                />
+                <div className="p-6">
+                  <h3 className="font-semibold text-xl text-gray-900 mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {item.date
+                      ? new Date(item.date).toLocaleDateString("id-ID", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Tanggal tidak tersedia"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">📸</div>
+            <p className="text-gray-500">Galeri belum tersedia...</p>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -4,6 +4,7 @@ import CountdownTimer from "../components/countdownTimer";
 
 export default function AllEvents() {
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -14,50 +15,88 @@ export default function AllEvents() {
         setEvents(res.data);
       } catch (error) {
         console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchEvents();
   }, []);
 
-  const duplicatedEvents = [...events, ...events]; // duplikat agar bisa looping
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600 text-lg">Memuat events...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full py-4 px-8 overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-center items-center mb-4 orbitron-regular">
-        <h2 className="text-2xl font-bold text-[#FF00FF]">All Events</h2>
-      </div>
-
-      {/* Carousel */}
-      <div className="relative w-full overflow-hidden">
-        <div className="flex gap-4 animate-slide">
-          {duplicatedEvents.map((event, index) => (
-            <div
-              key={index}
-              className="min-w-[450px] bg-black/40 border border-purple-500 p-4 rounded shadow oxanium-regular h-128 flex flex-col"
-            >
-              {event.imageUrl && (
-                <img
-                  src={event.imageUrl}
-                  alt={event.title}
-                  className="w-full h-40 object-cover rounded mb-3 border border-purple-300"
-                />
-              )}
-              <h3 className="text-lg font-semibold text-[#00FFFF]">
-                {event.title}
-              </h3>
-              <p className="text-white text-sm mt-1 line-clamp-5 flex-grow mb-5">
-                {event.description}
-              </p>
-              <div className="mt-auto text-center text-2xl font-medium text-yellow-400 space-y-1">
-                <p className="text-sm text-white">Mulai Pada:</p>
-                <CountdownTimer targetDate={event.date} />
-              </div>
-            </div>
-          ))}
+    <section className="min-h-screen bg-white py-30 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+            Semua Event
+          </h2>
+          <div className="w-24 h-1 bg-indigo-600 mx-auto mb-6"></div>
+          <p className="text-lg text-gray-600">
+            Ikuti berbagai event menarik dari komunitas di Kota Semarang
+          </p>
         </div>
+
+        {/* Events */}
+        {events.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {events.map((event) => {
+              const formattedDate = new Date(event.date).toLocaleDateString(
+                "id-ID",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }
+              );
+
+              return (
+                <div
+                  key={event.id}
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col"
+                >
+                  {event.imageUrl && (
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="font-semibold text-xl text-gray-900 mb-2">
+                      {event.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">{formattedDate}</p>
+                    <p className="text-gray-600 text-sm flex-grow mb-6 line-clamp-4">
+                      {event.description}
+                    </p>
+                    <div className="bg-indigo-50 rounded-lg p-4 text-center">
+                      <p className="text-sm font-medium text-indigo-700 mb-1">
+                        Mulai Dalam:
+                      </p>
+                      <CountdownTimer targetDate={event.date} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">📅</div>
+            <p className="text-gray-500">Belum ada event yang tersedia...</p>
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   );
 }

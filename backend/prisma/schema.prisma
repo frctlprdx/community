@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,30 +11,32 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
-  phone_number String?
-  passwordHash String
-  role Role @default(MEMBER)
-  bio String?
-  profilePicture String?
-  createdAt DateTime @default(now())
+  id              Int              @id @default(autoincrement())
+  name            String
+  email           String           @unique
+  phone_number    String?
+  passwordHash    String
+  role            Role             @default(MEMBER)
+  bio             String?
+  profilePicture  String?
+  createdAt       DateTime         @default(now())
 
   communityMemberships CommunityMember[]
-  loginHistories    LoginHistory[]   // relasi ke history login
-  applyEvents       ApplyEvent[]     // relasi ke ApplyEvent
+  loginHistories        LoginHistory[]   // relasi ke history login
+  applyEvents           ApplyEvent[]     // relasi ke ApplyEvent
 
   @@map("users")
 }
 
 model Community {
-  id       Int       @id @default(autoincrement())
-  name     String
-  createdAt DateTime @default(now())
+  id          Int       @id @default(autoincrement())
+  name        String
+  category    String?
+  socialLink  String?
+  createdAt   DateTime  @default(now())
 
-  galleries Gallery[] @relation("CommunityGallery")
-  events    Event[]   @relation("EventCreator")
+  galleries   Gallery[] @relation("CommunityGallery")
+  events      Event[]   @relation("EventCreator")
   communityMemberships CommunityMember[]
   applyEvents ApplyEvent[] // opposite relation for ApplyEvent
 
@@ -60,7 +59,7 @@ model Gallery {
 model Event {
   id          Int       @id @default(autoincrement())
   title       String
-  description String @db.LongText
+  description String    @db.LongText
   date        DateTime
   imageUrl    String?
   createdAt   DateTime  @default(now())
@@ -105,10 +104,9 @@ model ApplyEvent {
   user        User      @relation(fields: [userId], references: [id])
   community   Community @relation(fields: [communityId], references: [id])
 
-  @@unique([userId, communityId, title]) // optional, mencegah user submit event yang sama di komunitas yang sama
+  @@unique([userId, communityId, title]) // mencegah duplicate apply event
   @@map("apply_event")
 }
-
 
 enum Role {
   ADMIN
