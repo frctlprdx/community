@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Gallery from "./pages/Gallery";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import RegisterCommunity from "./pages/RegisterCommunity";
 import RegisterMember from "./pages/RegisterMember";
 import CommunityLayout from "./layouts/CommunityLayouts";
@@ -38,6 +39,7 @@ function App() {
           <Route path="/registercommunity" element={<RegisterCommunity />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/appliedevent" element={<ApplyEvent />} />
+          <Route path="/profile" element={<Profile />} />
 
           <Route path="/community" element={<CommunityLayout />}>
             <Route path="events" element={<CommunityEvents />} />

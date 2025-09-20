@@ -17,6 +17,7 @@ exports.getUserById = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Ambil user terlebih dahulu untuk cek role
     const user = await prisma.user.findUnique({
       where: { id: parseInt(id) },
     });
@@ -25,13 +26,38 @@ exports.getUserById = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Jika role MEMBER, return user biasa
+    if (user.role === "MEMBER") {
+      res.status(200).json(user);
+      return;
+    }
+
+    // Jika role COMMUNITY, join dengan tabel communities
+    if (user.role === "COMMUNITY") {
+      const community = await prisma.community.findFirst({
+        where: {
+          name: user.name,
+        },
+      });
+
+      // Gabungkan data user dan community
+      const result = {
+        ...user,
+        ...community
+      };
+
+      res.status(200).json(result);
+      return;
+    }
+
+    // Jika role lainnya, return user biasa
     res.status(200).json(user);
+
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 // UPDATE USER
 exports.updateUser = async (req, res) => {
   try {
