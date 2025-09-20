@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Users, Mail, Phone, Lock, FileText, Camera } from "lucide-react";
+import { Users, Mail, Phone, Lock, FileText, Camera, CheckCircle, AlertCircle, Loader2, Link, Tag } from "lucide-react";
+import { supabase } from "../../supabase";
 
 export default function RegisterCommunity() {
   const [formData, setFormData] = useState({
@@ -9,72 +10,139 @@ export default function RegisterCommunity() {
     password: "",
     bio: "",
     profilePicture: null,
+    category: "",
+    socialLink: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    if (e.target.name === "profilePicture") {
-      setFormData({ ...formData, [e.target.name]: e.target.files[0] });
+    const { name, value, files } = e.target;
+    
+    if (name === "profilePicture") {
+      setFormData({ ...formData, [name]: files[0] });
     } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+      setFormData({ ...formData, [name]: value });
     }
-    // Clear error when user starts typing
-    if (error) setError("");
+
+    // Clear specific field error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: null });
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Basic client-side validation
-    if (!formData.name || !formData.email || !formData.password) {
-      setError("Nama, email, dan password wajib diisi");
-      return;
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Nama komunitas wajib diisi";
     }
 
-    if (formData.password.length < 8) {
-      setError("Password minimal 8 karakter");
-      return;
+    if (!formData.email.trim()) {
+      newErrors.email = "Email wajib diisi";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Format email tidak valid";
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError("Format email tidak valid");
-      return;
+    if (!formData.password) {
+      newErrors.password = "Password wajib diisi";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password minimal 8 karakter";
     }
 
+    if (formData.phone_number && !/^[0-9+\-\s()]+$/.test(formData.phone_number)) {
+      newErrors.phone_number = "Format nomor telepon tidak valid";
+    }
+
+    if (formData.socialLink && !formData.socialLink.startsWith('http')) {
+      newErrors.socialLink = "Link sosial harus dimulai dengan http:// atau https://";
+    }
+
+    return newErrors;
+  };
+
+  const uploadProfilePicture = async (file) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `profile/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("community-diskominfo")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const imageUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/community-diskominfo/${fileName}`;
+      return imageUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw new Error("Gagal mengupload gambar profil");
+    }
+  };
+
+  const handleSubmit = async () => {
     setIsLoading(true);
-    setError("");
-    setSuccess("");
+    setErrors({});
+    setMessage("");
+    setIsSuccess(false);
+
+    // Client-side validation
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      // Prepare data to send (excluding optional fields for now as requested)
-      const dataToSend = {
-        name: formData.name,
-        email: formData.email,
-        phone_number: formData.phone_number,
+      let profilePictureUrl = null;
+
+      // Upload profile picture to Supabase if provided
+      if (formData.profilePicture) {
+        try {
+          profilePictureUrl = await uploadProfilePicture(formData.profilePicture);
+        } catch (uploadError) {
+          setMessage("Gagal mengupload gambar profil. Silakan coba lagi.");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Prepare data for submission
+      const submitData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
         password: formData.password,
-        // bio: formData.bio, // commented out as requested
-        // profilePicture: formData.profilePicture, // commented out as requested
+        phone_number: formData.phone_number.trim() || undefined,
+        bio: formData.bio.trim() || undefined,
+        profilePicture: profilePictureUrl, // URL gambar dari Supabase
+        category: formData.category.trim() || undefined,
+        socialLink: formData.socialLink.trim() || undefined,
       };
 
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/auth/registercommunity`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(dataToSend),
+          body: JSON.stringify(submitData),
         }
       );
 
-      const result = await response.json();
+      const data = await response.json();
 
-      if (result.success) {
-        setSuccess(result.message || "Komunitas berhasil didaftarkan!");
+      if (!response.ok) {
+        throw new Error(data.message || "Terjadi kesalahan saat mendaftarkan komunitas");
+      }
+
+      if (data.success) {
+        setIsSuccess(true);
+        setMessage(data.message);
         // Reset form
         setFormData({
           name: "",
@@ -83,18 +151,59 @@ export default function RegisterCommunity() {
           password: "",
           bio: "",
           profilePicture: null,
+          category: "",
+          socialLink: "",
         });
         
-        // Optional: Redirect to login or dashboard after successful registration
-        // setTimeout(() => {
-        //   window.location.href = "/login";
-        // }, 2000);
+        // Clear file input
+        const fileInput = document.querySelector('input[name="profilePicture"]');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
       } else {
-        setError(result.message || "Terjadi kesalahan saat mendaftarkan komunitas");
+        throw new Error(data.message || "Registrasi komunitas gagal");
       }
+
     } catch (error) {
       console.error("Registration error:", error);
-      setError("Terjadi kesalahan jaringan. Silakan coba lagi.");
+      
+      // Handle different types of errors
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+      } else if (error.message.includes("fetch")) {
+        setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+      } else {
+        // Try to parse server response errors
+        try {
+          const errorResponse = await error.response?.json();
+          const { message: serverMessage, errors: serverErrors } = errorResponse || {};
+          
+          setMessage(serverMessage || error.message || "Terjadi kesalahan saat mendaftarkan komunitas");
+          
+          if (serverErrors) {
+            setErrors(serverErrors);
+          }
+        } catch {
+          setMessage(error.message || "Terjadi kesalahan tidak terduga. Silakan coba lagi.");
+        }
+      }
+
+      // If there was an uploaded image but registration failed, clean up
+      if (formData.profilePicture && profilePictureUrl) {
+        try {
+          const fileName = profilePictureUrl.split("/community-diskominfo/")[1];
+          if (fileName) {
+            await supabase.storage.from("community-diskominfo").remove([fileName]);
+          }
+        } catch (cleanupError) {
+          console.warn("Failed to cleanup uploaded image:", cleanupError);
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +211,6 @@ export default function RegisterCommunity() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Add padding top to avoid navbar overlap */}
       <div className="pt-20 pb-12 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
@@ -114,35 +222,41 @@ export default function RegisterCommunity() {
               Daftarkan Komunitas Anda
             </h1>
             <p className="text-gray-600 text-lg">
-              Bergabunglah sebagai penyelenggara komunitas dan kelola member
-              dengan mudah
+              Bergabunglah sebagai penyelenggara komunitas dan kelola member dengan mudah
             </p>
           </div>
+
+          {/* Success Message */}
+          {isSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <div className="flex items-center">
+                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+                <p className="text-green-800 font-medium">{message}</p>
+              </div>
+              <p className="text-green-600 text-sm mt-1">Anda akan diarahkan ke halaman login...</p>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {message && !isSuccess && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                <p className="text-red-800 font-medium">{message}</p>
+              </div>
+            </div>
+          )}
 
           {/* Main Content */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="p-8 lg:p-12">
               <div className="max-w-2xl mx-auto">
                 <div className="space-y-6">
-                  {/* Error Message */}
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-                      <p className="text-red-600 text-sm">{error}</p>
-                    </div>
-                  )}
-
-                  {/* Success Message */}
-                  {success && (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                      <p className="text-green-600 text-sm">{success}</p>
-                    </div>
-                  )}
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Nama Komunitas */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Nama Komunitas *
+                        Nama Komunitas <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -152,17 +266,22 @@ export default function RegisterCommunity() {
                           value={formData.name}
                           onChange={handleChange}
                           placeholder="Masukkan nama komunitas"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.name ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
                           disabled={isLoading}
+                          required
                         />
                       </div>
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      )}
                     </div>
 
-                    {/* Email Komunitas */}
+                    {/* Email */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Email Komunitas *
+                        Email <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -171,20 +290,25 @@ export default function RegisterCommunity() {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          placeholder="kontak@komunitas.com"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          placeholder="contoh@email.com"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
                           disabled={isLoading}
+                          required
                         />
                       </div>
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Nomor WhatsApp Komunitas */}
+                    {/* Nomor Telepon */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Nomor WhatsApp Komunitas
+                        Nomor Telepon
                       </label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -194,16 +318,21 @@ export default function RegisterCommunity() {
                           value={formData.phone_number}
                           onChange={handleChange}
                           placeholder="08xxxxxxxxxx"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.phone_number ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
                           disabled={isLoading}
                         />
                       </div>
+                      {errors.phone_number && (
+                        <p className="mt-1 text-sm text-red-600">{errors.phone_number}</p>
+                      )}
                     </div>
 
                     {/* Kata Sandi */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Kata Sandi *
+                        Kata Sandi <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -213,21 +342,66 @@ export default function RegisterCommunity() {
                           value={formData.password}
                           onChange={handleChange}
                           placeholder="Minimal 8 karakter"
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
-                          required
+                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                            errors.password ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          }`}
                           disabled={isLoading}
+                          required
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Password harus minimal 8 karakter
-                      </p>
+                      {errors.password && (
+                        <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Deskripsi Komunitas - Disabled for now */}
-                  <div className="opacity-50">
+                  {/* Kategori Komunitas */}
+                  <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Deskripsi Komunitas (Segera Hadir)
+                      Kategori Komunitas
+                    </label>
+                    <div className="relative">
+                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <input
+                        type="text"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        placeholder="Teknologi, Bisnis, Pendidikan, dll."
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Link Media Sosial */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Link Media Sosial
+                    </label>
+                    <div className="relative">
+                      <Link className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <input
+                        type="url"
+                        name="socialLink"
+                        value={formData.socialLink}
+                        onChange={handleChange}
+                        placeholder="https://instagram.com/komunitas-anda"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
+                          errors.socialLink ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    {errors.socialLink && (
+                      <p className="mt-1 text-sm text-red-600">{errors.socialLink}</p>
+                    )}
+                  </div>
+
+                  {/* Deskripsi Komunitas */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Deskripsi Komunitas (Opsional)
                     </label>
                     <div className="relative">
                       <FileText className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -235,105 +409,85 @@ export default function RegisterCommunity() {
                         name="bio"
                         value={formData.bio}
                         onChange={handleChange}
-                        placeholder="Fitur ini akan segera tersedia..."
+                        placeholder="Ceritakan tentang komunitas Anda, tujuan, dan aktivitas yang dilakukan..."
                         rows="4"
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-gray-50"
-                        disabled={true}
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
 
-                  {/* Logo/Foto Komunitas - Disabled for now */}
-                  <div className="opacity-50">
+                  {/* Logo/Foto Profil */}
+                  <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Logo/Foto Komunitas (Segera Hadir)
+                      Logo/Foto Profil Komunitas (Opsional)
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
                       <Camera className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                       <div className="text-sm text-gray-600 mb-4">
-                        <span className="text-gray-400 font-medium">
-                          Fitur upload foto akan segera tersedia
-                        </span>
-                        <p className="mt-1">Sementara waktu tidak tersedia</p>
+                        <label className="cursor-pointer">
+                          <span className="text-blue-600 font-medium hover:text-blue-500">
+                            Pilih logo komunitas
+                          </span>
+                          <input
+                            type="file"
+                            name="profilePicture"
+                            onChange={handleChange}
+                            accept="image/jpeg,image/jpg,image/png,image/gif"
+                            className="hidden"
+                            disabled={isLoading}
+                          />
+                        </label>
+                        <p className="mt-1">atau drag and drop</p>
                       </div>
-                      <p className="text-xs text-gray-400">
-                        PNG, JPG, GIF up to 10MB
-                      </p>
+                      <p className="text-xs text-gray-500">PNG, JPG, JPEG, GIF maksimal 10MB</p>
+                      {formData.profilePicture && (
+                        <div className="mt-4">
+                          <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>File terpilih: {formData.profilePicture.name}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-
-                  {/* Benefits Section */}
-                  <div className="bg-blue-50 rounded-xl p-6 mt-8">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      Keuntungan Sebagai Komunitas:
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                        <span>Dashboard management komunitas</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                        <span>Buat dan kelola event</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                        <span>Analitik dan laporan aktivitas</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                        <span>Akses eksklusif ke komunitas lain</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Required Fields Notice */}
-                  <div className="text-sm text-gray-500 bg-gray-50 rounded-xl p-4">
-                    <p>* Field yang wajib diisi</p>
-                    <p className="mt-1">
-                      Bio komunitas dan upload foto akan tersedia dalam update selanjutnya
-                    </p>
                   </div>
 
                   {/* Submit Button */}
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                    className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-md mt-6 ${
-                      isLoading
-                        ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                        : "bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-[1.02]"
-                    }`}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Mendaftarkan Komunitas...
-                      </div>
-                    ) : (
-                      "Daftarkan Komunitas"
-                    )}
-                  </button>
-
-                  {/* Bottom Links */}
-                  <div className="mt-6 text-center space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Sudah punya akun?{" "}
-                      <a
-                        href="/login"
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        Masuk
-                      </a>
-                    </p>
-                    <a
-                      href="/"
-                      className="text-sm text-gray-500 hover:text-gray-700 block"
+                  <div className="pt-6">
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isLoading || isSuccess}
+                      className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
                     >
-                      ← Kembali ke Beranda
-                    </a>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                          {formData.profilePicture ? 'Mengupload logo & mendaftar...' : 'Mendaftarkan komunitas...'}
+                        </>
+                      ) : isSuccess ? (
+                        <>
+                          <CheckCircle className="h-5 w-5 mr-2" />
+                          Berhasil Terdaftar!
+                        </>
+                      ) : (
+                        'Daftarkan Komunitas'
+                      )}
+                    </button>
                   </div>
+                </div>
+
+                {/* Footer Links */}
+                <div className="mt-8 text-center space-y-4">
+                  <p className="text-gray-600">
+                    Sudah punya akun?{" "}
+                    <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                      Masuk di sini
+                    </a>
+                  </p>
+                  <a href="/" className="text-sm text-gray-500 hover:text-gray-700 inline-block">
+                    ← Kembali ke Beranda
+                  </a>
                 </div>
               </div>
             </div>

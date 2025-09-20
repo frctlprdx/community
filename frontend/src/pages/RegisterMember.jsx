@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { User, Mail, Phone, Lock, FileText, Camera, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
-// Note: You'll need to install axios in your project: npm install axios
-// import axios from "axios";
+import { supabase } from "../../supabase";
 
 export default function RegisterMember() {
   const [formData, setFormData] = useState({
@@ -59,6 +58,25 @@ export default function RegisterMember() {
     return newErrors;
   };
 
+  const uploadProfilePicture = async (file) => {
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `profile/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("community-diskominfo")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const imageUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/community-diskominfo/${fileName}`;
+      return imageUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      throw new Error("Gagal mengupload gambar profil");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -75,6 +93,19 @@ export default function RegisterMember() {
     }
 
     try {
+      let profilePictureUrl = null;
+
+      // Upload profile picture to Supabase if provided
+      if (formData.profilePicture) {
+        try {
+          profilePictureUrl = await uploadProfilePicture(formData.profilePicture);
+        } catch (uploadError) {
+          setMessage("Gagal mengupload gambar profil. Silakan coba lagi.");
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // Prepare data for submission
       const submitData = {
         name: formData.name.trim(),
@@ -82,7 +113,7 @@ export default function RegisterMember() {
         password: formData.password,
         phone_number: formData.phone_number.trim() || undefined,
         bio: formData.bio.trim() || undefined,
-        profilePicture: null // For now, keep as null as requested
+        profilePicture: profilePictureUrl // URL gambar dari Supabase
       };
 
       const response = await fetch(
@@ -98,6 +129,10 @@ export default function RegisterMember() {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.message || "Terjadi kesalahan saat mendaftar");
+      }
+
       if (data.success) {
         setIsSuccess(true);
         setMessage(data.message);
@@ -111,28 +146,53 @@ export default function RegisterMember() {
           profilePicture: null,
         });
         
+        // Clear file input
+        const fileInput = document.querySelector('input[name="profilePicture"]');
+        if (fileInput) {
+          fileInput.value = '';
+        }
+        
         // Redirect to login after 2 seconds
         setTimeout(() => {
           window.location.href = "/login";
         }, 2000);
+      } else {
+        throw new Error(data.message || "Registrasi gagal");
       }
 
     } catch (error) {
       console.error("Registration error:", error);
       
+      // Handle different types of errors
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
         setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+      } else if (error.message.includes("fetch")) {
+        setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
       } else {
+        // Try to parse server response errors
         try {
-          const errorData = await error.response?.json();
-          const { message, errors: serverErrors } = errorData || {};
-          setMessage(message || "Terjadi kesalahan saat mendaftar");
+          const errorResponse = await error.response?.json();
+          const { message: serverMessage, errors: serverErrors } = errorResponse || {};
+          
+          setMessage(serverMessage || error.message || "Terjadi kesalahan saat mendaftar");
           
           if (serverErrors) {
             setErrors(serverErrors);
           }
         } catch {
-          setMessage("Terjadi kesalahan tidak terduga. Silakan coba lagi.");
+          setMessage(error.message || "Terjadi kesalahan tidak terduga. Silakan coba lagi.");
+        }
+      }
+
+      // If there was an uploaded image but registration failed, clean up
+      if (formData.profilePicture && profilePictureUrl) {
+        try {
+          const fileName = profilePictureUrl.split("/community-diskominfo/")[1];
+          if (fileName) {
+            await supabase.storage.from("community-diskominfo").remove([fileName]);
+          }
+        } catch (cleanupError) {
+          console.warn("Failed to cleanup uploaded image:", cleanupError);
         }
       }
     } finally {
@@ -178,7 +238,7 @@ export default function RegisterMember() {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="p-8 lg:p-12">
               <div className="max-w-2xl mx-auto">
-                <div className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Nama Lengkap */}
                     <div>
@@ -197,6 +257,7 @@ export default function RegisterMember() {
                             errors.name ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
                           }`}
                           disabled={isLoading}
+                          required
                         />
                       </div>
                       {errors.name && (
@@ -221,6 +282,7 @@ export default function RegisterMember() {
                             errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
                           }`}
                           disabled={isLoading}
+                          required
                         />
                       </div>
                       {errors.email && (
@@ -271,6 +333,7 @@ export default function RegisterMember() {
                             errors.password ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
                           }`}
                           disabled={isLoading}
+                          required
                         />
                       </div>
                       {errors.password && (
@@ -308,35 +371,42 @@ export default function RegisterMember() {
                       <div className="text-sm text-gray-600 mb-4">
                         <label className="cursor-pointer">
                           <span className="text-blue-600 font-medium hover:text-blue-500">
-                            Pilih foto baru
+                            Pilih foto profil
                           </span>
                           <input
                             type="file"
                             name="profilePicture"
                             onChange={handleChange}
-                            accept="image/*"
+                            accept="image/jpeg,image/jpg,image/png,image/gif"
                             className="hidden"
                             disabled={isLoading}
                           />
                         </label>
                         <p className="mt-1">atau drag and drop</p>
                       </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                      <p className="text-xs text-gray-400 mt-1">(Fitur upload foto akan segera tersedia)</p>
+                      <p className="text-xs text-gray-500">PNG, JPG, JPEG, GIF maksimal 10MB</p>
+                      {formData.profilePicture && (
+                        <div className="mt-4">
+                          <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
+                            <CheckCircle className="w-4 h-4" />
+                            <span>File terpilih: {formData.profilePicture.name}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Submit Button */}
                   <div className="pt-6">
                     <button
-                      onClick={handleSubmit}
+                      type="submit"
                       disabled={isLoading || isSuccess}
                       className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
                     >
                       {isLoading ? (
                         <>
                           <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                          Mendaftar...
+                          {formData.profilePicture ? 'Mengupload foto & mendaftar...' : 'Mendaftar...'}
                         </>
                       ) : isSuccess ? (
                         <>
@@ -348,7 +418,7 @@ export default function RegisterMember() {
                       )}
                     </button>
                   </div>
-                </div>
+                </form>
 
                 {/* Footer Links */}
                 <div className="mt-8 text-center space-y-4">
