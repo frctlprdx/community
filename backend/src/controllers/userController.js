@@ -43,7 +43,7 @@ exports.getUserById = async (req, res) => {
       // Gabungkan data user dan community
       const result = {
         ...user,
-        ...community
+        ...community,
       };
 
       res.status(200).json(result);
@@ -52,7 +52,6 @@ exports.getUserById = async (req, res) => {
 
     // Jika role lainnya, return user biasa
     res.status(200).json(user);
-
   } catch (error) {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -62,27 +61,66 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, role } = req.body;
 
-    const updatedUser = await prisma.user.update({
-      where: { id: parseInt(id) },
-      data: {
-        name,
-        email,
-        role,
-      },
+    // ambil semua field dari body
+    const {
+      name,
+      email,
+      role,
+      phone_number,
+      bio,
+      profilePicture,
+      // khusus Community
+      socialLink,
+      category,
+    } = req.body;
+
+    // bikin objek untuk update User
+    const userUpdateData = {};
+    if (name !== undefined) userUpdateData.name = name;
+    if (email !== undefined) userUpdateData.email = email;
+    if (role !== undefined) userUpdateData.role = role;
+    if (phone_number !== undefined) userUpdateData.phone_number = phone_number;
+    if (bio !== undefined) userUpdateData.bio = bio;
+    if (profilePicture !== undefined)
+      userUpdateData.profilePicture = profilePicture;
+
+    let updatedUser, updatedCommunity;
+
+    await prisma.$transaction(async (tx) => {
+      // update tabel User
+      updatedUser = await tx.user.update({
+        where: { id: parseInt(id) },
+        data: userUpdateData,
+      });
+
+      // kalau role COMMUNITY, update Community juga
+      if (updatedUser.role === "COMMUNITY") {
+        const communityUpdateData = {};
+        if (socialLink !== undefined)
+          communityUpdateData.socialLink = socialLink;
+        if (category !== undefined) communityUpdateData.category = category;
+
+        // pastikan Community ada untuk user ini
+        updatedCommunity = await tx.community.updateMany({
+          where: { id: updatedUser.id }, // asumsi id user == id community (kalau beda kasih tau ya)
+          data: communityUpdateData,
+        });
+      }
     });
 
     res.status(200).json({
       message: "User updated successfully",
-      data: updatedUser,
+      data: {
+        user: updatedUser,
+        community: updatedCommunity,
+      },
     });
   } catch (error) {
-    console.error("Error updating user:", error);
+    console.error("Error updating user & community:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 // DELETE USER
 exports.deleteUser = async (req, res) => {
   try {
