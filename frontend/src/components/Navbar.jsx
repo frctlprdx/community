@@ -2,17 +2,23 @@ import { useState, useEffect } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo ksc revisi.png";
 import GuestNav from "./GuestNav";
 import UserNav from "./UserNav";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     const user = localStorage.getItem("user");
-    setIsLoggedIn(!!user);
+    if (user) {
+      setIsLoggedIn(true);
+      setUserName(user); // ambil nama user dari localStorage
+    } else {
+      setIsLoggedIn(false);
+      setUserName("");
+    }
   }, []);
 
   const baseMenu = [
@@ -28,10 +34,10 @@ function Navbar() {
       <header className="fixed top-0 left-0 right-0 z-50">
         <div className="mx-3 mt-3 bg-white/80 backdrop-blur-md shadow-lg sm:rounded-full rounded-lg">
           <nav className="flex justify-between items-center px-6 py-4">
-            {/* Logo */}
+            {/* Logo / Greeting */}
             <div className="flex items-center space-x-2">
-              <Link to="/" className="text-2xl font-bold">
-                Komunitas Kota Semarang
+              <Link to="/" className="text-lg sm:text-xl font-bold text-blue-600">
+                {isLoggedIn ? `Selamat datang, ${userName}` : "Selamat datang"}
               </Link>
             </div>
 

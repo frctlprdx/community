@@ -5,7 +5,7 @@ function GuestNav({ mobile = false, onClose }) {
     // Mobile menu style
     return (
       <Link
-        to="/loginregister"
+        to="/login"
         onClick={onClose}
         className="block w-full text-center px-6 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition"
       >

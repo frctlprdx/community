@@ -1,65 +1,35 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const bcrypt = require("bcrypt");
 
-exports.createCommunity = async (req, res) => {
-  const { name, email, password, phone_number } = req.body;
-
+exports.getAllCommunities = async (req, res) => {
   try {
-    if (!name || !email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Name, email, and password are required." });
-    }
-
-    // Cek apakah email sudah digunakan
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "Email sudah digunakan" });
-    }
-
-    // Hash password
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-
-    // Buat komunitas baru
-    const newCommunity = await prisma.community.create({
-      data: {
-        name,
-      },
-    });
-
-    // Buat user dan sambungkan ke komunitas lewat communityId
-    const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-        phone_number,
+    // Ambil user dengan role COMMUNITY
+    const communityUsers = await prisma.user.findMany({
+      where: {
         role: "COMMUNITY",
       },
     });
 
-    res.status(201).json({
-      message: "Komunitas dan user berhasil dibuat",
-      community: newCommunity,
-      user: newUser,
+    // Ambil semua community yang nama nya ada di daftar user
+    const communities = await prisma.community.findMany({
+      where: {
+        name: {
+          in: communityUsers.map((user) => user.name),
+        },
+      },
     });
-  } catch (error) {
-    console.error("DETAIL ERROR:", error);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-};
 
-exports.getAllCommunities = async (req, res) => {
-  try {
-    const communities = await prisma.community.findMany();
-    res.status(200).json(communities);
+    // Simple mapping
+    const result = communityUsers.map((user) => {
+      const community = communities.find((c) => c.name === user.name);
+
+      return {
+        ...user,
+        ...community
+      };
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching communities:", error);
     res.status(500).json({ message: "Internal server error" });
