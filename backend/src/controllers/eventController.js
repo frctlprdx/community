@@ -31,9 +31,29 @@ exports.getAllEvents = async (req, res) => {
       orderBy: {
         date: "asc",
       },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
-    res.status(200).json(events);
+    // Flatten biar tidak ada object "createdBy"
+    const formattedEvents = events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      imageUrl: event.imageUrl,
+      createdAt: event.createdAt,
+      createdById: event.createdById,
+      communityName: event.createdBy?.name || null,
+    }));
+
+    res.status(200).json(formattedEvents);
   } catch (error) {
     console.error("Error getting events:", error);
     res.status(500).json({ message: "Internal server error" });

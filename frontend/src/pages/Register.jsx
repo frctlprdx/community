@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 function Register() {
   const [communities, setCommunities] = useState([]);
   const [filteredCommunities, setFilteredCommunities] = useState([]);
-  const [id, setId] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Search and filter states
@@ -14,9 +13,6 @@ function Register() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const localId = localStorage.getItem("id");
-    setId(localId);
-
     const fetchCommunities = async () => {
       try {
         setLoading(true);

@@ -32,9 +32,27 @@ exports.createPost = async (req, res) => {
 
 exports.getAllPosts = async (req, res) => {
   try {
-    const galleries = await prisma.gallery.findMany();
+    const galleries = await prisma.gallery.findMany({
+      include: {
+        community: {
+          select: {
+            name: true, // hanya ambil nama komunitas
+          },
+        },
+      },
+    });
 
-    res.status(200).json(galleries); // ⬅️ langsung kirim array, bukan dibungkus object
+    // Flatten data supaya community nggak jadi object lagi
+    const formattedGalleries = galleries.map((gallery) => ({
+      id: gallery.id,
+      title: gallery.title,
+      imageUrl: gallery.imageUrl,
+      uploadedAt: gallery.uploadedAt,
+      communityId: gallery.communityId,
+      communityName: gallery.community?.name || null, // langsung jadi property baru
+    }));
+
+    res.status(200).json(formattedGalleries);
   } catch (error) {
     console.error("Gagal mengambil galeri:", error);
     res
