@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
   const [communities, setCommunities] = useState([]);
   const [filteredCommunities, setFilteredCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,6 +75,12 @@ function Register() {
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("all");
+  };
+
+  const handleCommunityClick = (communityName) => {
+    // Encode the community name for URL safety
+    const encodedName = encodeURIComponent(communityName);
+    navigate(`/community/${encodedName}`);
   };
 
   return (
@@ -238,6 +245,7 @@ function Register() {
             {filteredCommunities.map((community) => (
               <div
                 key={community.id}
+                onClick={() => handleCommunityClick(community.name)}
                 className="cursor-pointer bg-white rounded-xl shadow-md hover:shadow-xl border border-gray-200 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
               >
                 {/* Community Image */}
@@ -356,14 +364,9 @@ function Register() {
                             />
                           </svg>
                         </div>
-                        <a
-                          href={community.socialLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:text-purple-800 hover:underline font-medium flex-1"
-                        >
-                          Kunjungi Media Sosial
-                        </a>
+                        <span className="text-purple-600 font-medium flex-1">
+                          Ada Media Sosial
+                        </span>
                       </div>
                     )}
                   </div>
@@ -443,6 +446,41 @@ function Register() {
               >
                 Daftarkan Komunitas
               </Link>
+            </div>
+          </div>
+        )}
+
+        {/* No results from filter */}
+        {communities.length > 0 && filteredCommunities.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  className="w-8 h-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                Tidak Ditemukan
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Tidak ada komunitas yang sesuai dengan pencarian atau filter Anda.
+              </p>
+              <button
+                onClick={clearFilters}
+                className="inline-block bg-blue-600 text-white font-medium px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition-colors"
+              >
+                Hapus Filter
+              </button>
             </div>
           </div>
         )}

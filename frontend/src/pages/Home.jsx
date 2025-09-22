@@ -159,12 +159,12 @@ function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link to="/register">
-              <button className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                Daftarkan Komunitas
+              <button className="cursor-pointer px-8 py-4 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                Lihat Komunitas
               </button>
             </Link>
             <Link to="/event">
-              <button className="px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition-all duration-200">
+              <button className="cursor-pointer px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition-all duration-200">
                 Lihat Agenda
               </button>
             </Link>
@@ -183,12 +183,11 @@ function Home() {
               <div className="w-24 h-1 bg-blue-600 mb-6"></div>
               <p className="text-lg text-gray-600 mb-8">
                 Bergabunglah dengan beragam komunitas di Kota Semarang yang
-                aktif dalam berbagai bidang mulai dari seni, olahraga,
-                teknologi, hingga sosial kemasyarakatan.
+                aktif dalam berbagai bidang.
               </p>
               {communities.length > 0 && (
                 <Link to="/register">
-                  <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
+                  <button className="cursor-pointer px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
                     Lihat Semua Komunitas
                   </button>
                 </Link>
@@ -378,7 +377,7 @@ function Home() {
                             <div className="flex space-x-2">
                               <button
                                 onClick={prevCommunity}
-                                className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                                className="cursor-pointer p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -396,7 +395,7 @@ function Home() {
                               </button>
                               <button
                                 onClick={nextCommunity}
-                                className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                                className="cursor-pointer p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -479,7 +478,7 @@ function Home() {
                         <div className="flex space-x-2">
                           <button
                             onClick={prevGallery}
-                            className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                            className="cursor-pointer p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                           >
                             <svg
                               className="w-4 h-4"
@@ -497,7 +496,7 @@ function Home() {
                           </button>
                           <button
                             onClick={nextGallery}
-                            className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                            className="cursor-pointer p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                           >
                             <svg
                               className="w-4 h-4"
@@ -533,13 +532,12 @@ function Home() {
               </h2>
               <div className="w-24 h-1 bg-blue-600 mb-6"></div>
               <p className="text-lg text-gray-600 mb-8">
-                Momen-momen berharga dari komunitas di Semarang yang penuh
-                inspirasi dan kolaborasi. Setiap kegiatan mencerminkan semangat
-                gotong royong dan kreativitas warga Semarang.
+                Momen-momen kolaborasi dari komunitas di Semarang yang penuh
+                inspirasi.
               </p>
               {galleries.length > 0 && (
                 <Link to="/gallery">
-                  <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
+                  <button className="cursor-pointer px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
                     Lihat Semua Galeri
                   </button>
                 </Link>
@@ -565,7 +563,7 @@ function Home() {
               </p>
               {events.length > 0 && (
                 <Link to="/event">
-                  <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
+                  <button className="cursor-pointer px-8 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
                     Lihat Semua Agenda
                   </button>
                 </Link>
@@ -716,7 +714,7 @@ function Home() {
                             <div className="flex space-x-2">
                               <button
                                 onClick={prevEvent}
-                                className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                                className="cursor-pointer p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -734,7 +732,7 @@ function Home() {
                               </button>
                               <button
                                 onClick={nextEvent}
-                                className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                                className="cursor-pointer p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -780,7 +778,7 @@ function Home() {
             untuk menciptakan gerakan positif di Kota Semarang.
           </p>
           <Link to="/register">
-            <button className="px-8 py-4 bg-white text-blue-600 font-semibold rounded-full shadow-lg hover:bg-gray-50 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+            <button className="cursor-pointer px-8 py-4 bg-white text-blue-600 font-semibold rounded-full shadow-lg hover:bg-gray-50 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
               Daftarkan Komunitas Sekarang
             </button>
           </Link>

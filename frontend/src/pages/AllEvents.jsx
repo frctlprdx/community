@@ -39,7 +39,7 @@ export default function AllEvents() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
             Semua Event
           </h2>
-          <div className="w-24 h-1 bg-indigo-600 mx-auto mb-6"></div>
+          <div className="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
           <p className="text-lg text-gray-600">
             Ikuti berbagai event menarik dari komunitas di Kota Semarang
           </p>
@@ -72,15 +72,24 @@ export default function AllEvents() {
                     />
                   )}
                   <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-xl text-gray-900 mb-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-sm text-gray-500 mb-4">{formattedDate}</p>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-xl text-gray-900 flex-grow">
+                        {event.title}
+                      </h3>
+                      {event.communityName && (
+                        <span className="ml-2 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full shrink-0">
+                          {event.communityName}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {formattedDate}
+                    </p>
                     <p className="text-gray-600 text-sm flex-grow mb-6 line-clamp-4">
                       {event.description}
                     </p>
-                    <div className="bg-indigo-50 rounded-lg p-4 text-center">
-                      <p className="text-sm font-medium text-indigo-700 mb-1">
+                    <div className="bg-blue-50 rounded-lg p-4 text-center">
+                      <p className="text-sm font-medium text-blue-700 mb-1">
                         Mulai Dalam:
                       </p>
                       <CountdownTimer targetDate={event.date} />

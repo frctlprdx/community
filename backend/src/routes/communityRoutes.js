@@ -4,8 +4,10 @@ const communityController = require("../controllers/communityController");
 
 router.get("/get", communityController.getAllCommunities); //List community (Admin)
 router.get("/get/:id", communityController.communityMember); //List Member (Community)
+router.get("/getdetail/:name", communityController.communityDetail);
 router.delete("/member/:id", communityController.deleteMember); //Delete Member (Community)
-router.post("/join", communityController.joinCommunity); //Join Community (Member)
+router.post("/join", communityController.joinCommunity);
+router.get("/check-membership/:communityId/:userId", communityController.checkMembership);
 router.delete("/delete/:id", communityController.deleteCommunity); //Delete Community (Admin)
 router.put("/update/:id", communityController.updateCommunity);
 router.get("/gethistory", communityController.getHistoryLogin);

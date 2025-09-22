@@ -7,6 +7,7 @@ import Gallery from "./pages/Gallery";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import CommunityDetail from "./pages/CommunityDetail";
 import RegisterCommunity from "./pages/RegisterCommunity";
 import RegisterMember from "./pages/RegisterMember";
 import CommunityLayout from "./layouts/CommunityLayouts";
@@ -40,7 +41,11 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/appliedevent" element={<ApplyEvent />} />
           <Route path="/profile" element={<Profile />} />
+          
+          {/* Route untuk detail komunitas - TAMBAHAN BARU */}
+          <Route path="/community/:name" element={<CommunityDetail />} />
 
+          {/* Community dashboard routes */}
           <Route path="/community" element={<CommunityLayout />}>
             <Route path="events" element={<CommunityEvents />} />
             <Route path="events/add" element={<AddCommunityEvent />} />

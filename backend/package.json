@@ -9,7 +9,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.12.0",
+    "@prisma/client": "^6.16.2",
     "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.3.0",
     "bcrypt": "^6.0.0",
@@ -21,6 +21,6 @@
     "three": "^0.179.1"
   },
   "devDependencies": {
-    "prisma": "^6.12.0"
+    "prisma": "^6.16.2"
   }
 }

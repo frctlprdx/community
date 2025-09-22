@@ -25,7 +25,7 @@ exports.getAllCommunities = async (req, res) => {
 
       return {
         ...user,
-        ...community
+        ...community,
       };
     });
 
@@ -33,6 +33,69 @@ exports.getAllCommunities = async (req, res) => {
   } catch (error) {
     console.error("Error fetching communities:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+exports.communityDetail = async (req, res) => {
+  try {
+    const { name } = req.params;
+
+    if (!name) {
+      return res
+        .status(400)
+        .json({ message: "Nama komunitas harus disediakan" });
+    }
+
+    const communityName = decodeURIComponent(name).trim();
+
+    // Ambil user berdasarkan nama
+    const user = await prisma.user.findFirst({
+      where: {
+        name: {
+          equals: communityName,
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User tidak ditemukan" });
+    }
+
+    // Ambil community berdasarkan nama
+    const community = await prisma.community.findFirst({
+      where: {
+        name: {
+          equals: communityName,
+        },
+      },
+    });
+
+    if (!community) {
+      return res.status(404).json({ message: "Community tidak ditemukan" });
+    }
+
+    // Gabungkan data user + community, exclude id & passwordHash
+    const { id, passwordHash, ...userSafe } = user;
+    const { ...communitySafe } = community;
+
+    const result = {
+      ...userSafe,
+      ...communitySafe,
+    };
+
+    // Convert BigInt -> String supaya tidak error
+    const safeResult = JSON.parse(
+      JSON.stringify(result, (_, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      )
+    );
+
+    res.status(200).json(safeResult);
+  } catch (error) {
+    console.error("Error fetching community detail:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", detail: error.message });
   }
 };
 
@@ -76,54 +139,53 @@ exports.updateCommunity = async (req, res) => {
 
 exports.joinCommunity = async (req, res) => {
   try {
-    console.log("=== JOIN COMMUNITY DEBUG ===");
-    console.log("Request body:", req.body);
-
     const { userId, communityId } = req.body;
 
+    // Validasi input
     if (!userId || !communityId) {
-      console.log("Missing userId or communityId");
-      return res
-        .status(400)
-        .json({ message: "userId dan communityId wajib diisi" });
+      return res.status(400).json({
+        success: false,
+        message: "User ID dan Community ID harus diisi",
+      });
     }
 
+    // Konversi ke integer jika diperlukan
     const userIdInt = parseInt(userId);
     const communityIdInt = parseInt(communityId);
 
-    console.log("Parsed IDs:", { userIdInt, communityIdInt });
-
     if (isNaN(userIdInt) || isNaN(communityIdInt)) {
-      console.log("Invalid number format");
-      return res
-        .status(400)
-        .json({ message: "userId dan communityId harus berupa angka" });
+      return res.status(400).json({
+        success: false,
+        message: "User ID dan Community ID harus berupa angka yang valid",
+      });
     }
 
-    // Cek apakah user dan community ada
-    console.log("Checking user exists...");
+    // Cek apakah user exists
     const user = await prisma.user.findUnique({
       where: { id: userIdInt },
     });
-    console.log("User found:", !!user);
 
-    console.log("Checking community exists...");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User tidak ditemukan",
+      });
+    }
+
+    // Cek apakah community exists
     const community = await prisma.community.findUnique({
       where: { id: communityIdInt },
     });
-    console.log("Community found:", !!community);
-
-    if (!user) {
-      return res.status(400).json({ message: "User tidak ditemukan" });
-    }
 
     if (!community) {
-      return res.status(400).json({ message: "Community tidak ditemukan" });
+      return res.status(404).json({
+        success: false,
+        message: "Komunitas tidak ditemukan",
+      });
     }
 
-    // Cek membership yang sudah ada
-    console.log("Checking existing membership...");
-    const existing = await prisma.communityMember.findUnique({
+    // Cek apakah user sudah menjadi member
+    const existingMember = await prisma.communityMember.findUnique({
       where: {
         userId_communityId: {
           userId: userIdInt,
@@ -131,51 +193,110 @@ exports.joinCommunity = async (req, res) => {
         },
       },
     });
-    console.log("Existing membership:", !!existing);
 
-    if (existing) {
-      return res
-        .status(400)
-        .json({ message: "Sudah tergabung di komunitas ini" });
-    }
-
-    // Create new membership
-    console.log("Creating new membership...");
-    const newMember = await prisma.communityMember.create({
-      data: {
-        userId: userIdInt,
-        communityId: communityIdInt,
-      },
-    });
-    console.log("New member created:", newMember);
-
-    res.status(201).json({
-      message: "Berhasil bergabung ke komunitas",
-      data: newMember,
-    });
-  } catch (error) {
-    console.error("=== ERROR DETAILS ===");
-    console.error("Error name:", error.name);
-    console.error("Error code:", error.code);
-    console.error("Error message:", error.message);
-    console.error("Full error:", error);
-
-    // Handle Prisma specific errors
-    if (error.code === "P2002") {
-      return res.status(400).json({
-        message: "Sudah tergabung di komunitas ini",
+    if (existingMember) {
+      return res.status(409).json({
+        success: false,
+        message: "Anda sudah menjadi member komunitas ini",
       });
     }
 
-    if (error.code === "P2003") {
-      return res.status(400).json({
-        message: "User atau Community tidak ditemukan",
+    // Menggunakan transaction untuk memastikan konsistensi data
+    const result = await prisma.$transaction(async (prisma) => {
+      // Tambah member baru
+      const newMember = await prisma.communityMember.create({
+        data: {
+          userId: userIdInt,
+          communityId: communityIdInt,
+          role: "MEMBER",
+        },
+      });
+
+      // Update member count
+      const updatedCommunity = await prisma.community.update({
+        where: { id: communityIdInt },
+        data: {
+          memberCount: {
+            increment: 1,
+          },
+        },
+      });
+
+      return { newMember, updatedCommunity };
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Berhasil bergabung dengan komunitas",
+      data: {
+        membership: result.newMember,
+        community: {
+          id: result.updatedCommunity.id,
+          name: result.updatedCommunity.name,
+          memberCount: result.updatedCommunity.memberCount,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error joining community:", error);
+
+    // Handle specific Prisma errors
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        message: "Anda sudah menjadi member komunitas ini",
+      });
+    }
+
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        success: false,
+        message: "User atau komunitas tidak ditemukan",
       });
     }
 
     res.status(500).json({
-      message: "Terjadi kesalahan pada server",
+      success: false,
+      message: "Terjadi kesalahan server internal",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+};
+
+// Controller untuk mengecek membership status
+exports.checkMembership = async (req, res) => {
+  try {
+    const { communityId, userId } = req.params;
+
+    const userIdInt = parseInt(userId);
+    const communityIdInt = parseInt(communityId);
+
+    if (isNaN(userIdInt) || isNaN(communityIdInt)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID or community ID",
+      });
+    }
+
+    const membership = await prisma.communityMember.findUnique({
+      where: {
+        userId_communityId: {
+          userId: userIdInt,
+          communityId: communityIdInt,
+        },
+      },
+    });
+
+    res.json({
+      success: true,
+      isMember: !!membership,
+      membership: membership || null,
+    });
+  } catch (error) {
+    console.error("Error checking membership:", error);
+    res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan server internal",
     });
   }
 };
