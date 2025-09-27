@@ -504,3 +504,4 @@ exports.deleteAppliedEvent = async (req, res) => {
     });
   }
 };
+

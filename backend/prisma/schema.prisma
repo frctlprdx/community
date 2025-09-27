@@ -22,8 +22,9 @@ model User {
   createdAt       DateTime         @default(now())
 
   communityMemberships CommunityMember[]
-  loginHistories        LoginHistory[]   // relasi ke history login
-  applyEvents           ApplyEvent[]     // relasi ke ApplyEvent
+  loginHistories        LoginHistory[]
+  applyEvents           ApplyEvent[]
+  eventParticipants     EventParticipant[]   // 🔥 relasi ke event yang diikuti
 
   @@map("users")
 }
@@ -58,6 +59,22 @@ model Gallery {
   @@map("galleries")
 }
 
+model EventParticipant {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  userId    Int
+  joinedAt  DateTime @default(now())
+
+  // Relasi ke Event
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  // Relasi ke User
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId]) // mencegah user join event yang sama lebih dari sekali
+  @@map("event_participants")
+}
+
 model Event {
   id          Int       @id @default(autoincrement())
   title       String
@@ -66,9 +83,10 @@ model Event {
   imageUrl    String?
   createdAt   DateTime  @default(now())
 
-  // Relasi ke Community
   createdBy   Community? @relation("EventCreator", fields: [createdById], references: [id])
   createdById Int?
+
+  eventParticipants EventParticipant[]   // 🔥 relasi ke peserta event
 
   @@map("events")
 }

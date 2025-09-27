@@ -55,19 +55,6 @@ export default function AllEvents() {
                 onClick={handleAppliedEventsClick}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                  />
-                </svg>
                 Ajukan Event
               </button>
             </div>
@@ -94,7 +81,8 @@ export default function AllEvents() {
               return (
                 <div
                   key={event.id}
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col"
+                  onClick={() => navigate(`/event/${event.id}`)}
+                  className="cursor-pointer bg-white rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col"
                 >
                   {event.imageUrl && (
                     <img
@@ -133,7 +121,6 @@ export default function AllEvents() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">📅</div>
             <p className="text-gray-500">Belum ada event yang tersedia...</p>
           </div>
         )}

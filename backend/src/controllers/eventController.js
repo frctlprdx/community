@@ -38,10 +38,16 @@ exports.getAllEvents = async (req, res) => {
             name: true,
           },
         },
+        // Include participant count
+        _count: {
+          select: {
+            eventParticipants: true,
+          },
+        },
       },
     });
 
-    // Flatten biar tidak ada object "createdBy"
+    // Format events with participant count
     const formattedEvents = events.map((event) => ({
       id: event.id,
       title: event.title,
@@ -51,6 +57,7 @@ exports.getAllEvents = async (req, res) => {
       createdAt: event.createdAt,
       createdById: event.createdById,
       communityName: event.createdBy?.name || null,
+      participantCount: event._count.eventParticipants,
     }));
 
     res.status(200).json(formattedEvents);
@@ -106,11 +113,24 @@ exports.getCommunityEvent = async (req, res) => {
 
     const events = await prisma.event.findMany({
       where: {
-        createdById: Number(id), // pastikan tipe number
+        createdById: Number(id),
+      },
+      include: {
+        _count: {
+          select: {
+            eventParticipants: true,
+          },
+        },
       },
     });
 
-    res.status(200).json(events);
+    // Add participant count to each event
+    const formattedEvents = events.map((event) => ({
+      ...event,
+      participantCount: event._count.eventParticipants,
+    }));
+
+    res.status(200).json(formattedEvents);
   } catch (error) {
     console.error("Error getting events:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -120,17 +140,297 @@ exports.getCommunityEvent = async (req, res) => {
 exports.getEventById = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Validate ID
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({ 
+        success: false,
+        message: "ID event tidak valid" 
+      });
+    }
+
+    const event = await prisma.event.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        _count: {
+          select: {
+            eventParticipants: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Event tidak ditemukan" 
+      });
+    }
+
+    // Format event with additional data
+    const formattedEvent = {
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      imageUrl: event.imageUrl,
+      createdAt: event.createdAt,
+      createdById: event.createdById,
+      organizerName: event.createdBy?.name || null,
+      participantCount: event._count.eventParticipants,
+      // Add other fields that might be in your schema
+      location: event.location || null,
+      price: event.price || 0,
+      maxParticipants: event.maxParticipants || null,
+      category: event.category || null,
+      requirements: event.requirements || null,
+      contactEmail: event.contactEmail || null,
+      contactPhone: event.contactPhone || null,
+      startDate: event.startDate || event.date,
+      endDate: event.endDate || null,
+      registrationDeadline: event.registrationDeadline || null,
+    };
+
+    res.status(200).json(formattedEvent);
+  } catch (error) {
+    console.error("Error get event by ID:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Internal server error" 
+    });
+  }
+};
+
+// Updated join event with better error handling
+exports.joinCommunityEvent = async (req, res) => {
+  try {
+    const { eventId, userId } = req.body;
+
+    // Validate input
+    if (!eventId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Event ID dan User ID harus disediakan",
+      });
+    }
+
+    // Check if event exists
+    const event = await prisma.event.findUnique({
+      where: { id: parseInt(eventId) },
+      include: {
+        _count: {
+          select: {
+            eventParticipants: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event tidak ditemukan",
+      });
+    }
+
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User tidak ditemukan",
+      });
+    }
+
+    // Check if user is already registered
+    const existingParticipant = await prisma.eventParticipant.findUnique({
+      where: {
+        eventId_userId: {
+          eventId: parseInt(eventId),
+          userId: parseInt(userId),
+        },
+      },
+    });
+
+    if (existingParticipant) {
+      return res.status(409).json({
+        success: false,
+        message: "Anda sudah terdaftar di event ini",
+        isRegistered: true,
+      });
+    }
+
+    // Check if event is full (if maxParticipants is set)
+    if (event.maxParticipants && event._count.eventParticipants >= event.maxParticipants) {
+      return res.status(400).json({
+        success: false,
+        message: "Event sudah penuh",
+      });
+    }
+
+    // Create new participant
+    const participant = await prisma.eventParticipant.create({
+      data: { 
+        eventId: parseInt(eventId), 
+        userId: parseInt(userId) 
+      },
+    });
+
+    res.status(201).json({ 
+      success: true,
+      message: "Berhasil mendaftar event", 
+      participant,
+      isRegistered: true,
+    });
+  } catch (error) {
+    console.error("Error join event:", error);
+
+    // Handle Prisma unique constraint violation
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        message: "Anda sudah terdaftar di event ini",
+        isRegistered: true,
+      });
+    }
+
+    res.status(500).json({ 
+      success: false,
+      message: "Terjadi kesalahan saat mendaftar event" 
+    });
+  }
+};
+
+// Updated check registration endpoint to match frontend expectations
+exports.checkRegistration = async (req, res) => {
+  try {
+    const { eventId, userId } = req.params;
+    
+    // Validate parameters
+    if (!eventId || !userId || isNaN(parseInt(eventId)) || isNaN(parseInt(userId))) {
+      return res.status(400).json({
+        success: false,
+        message: "Event ID dan User ID harus berupa angka yang valid",
+      });
+    }
+
+    const existingParticipant = await prisma.eventParticipant.findUnique({
+      where: {
+        eventId_userId: {
+          eventId: parseInt(eventId),
+          userId: parseInt(userId),
+        },
+      },
+    });
+
+    res.json({ 
+      success: true,
+      isRegistered: !!existingParticipant 
+    });
+  } catch (error) {
+    console.error("Error checking registration:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Terjadi kesalahan saat mengecek status registrasi" 
+    });
+  }
+};
+
+// Keep the old endpoint for backward compatibility
+exports.checkUserJoinEvent = async (req, res) => {
+  try {
+    const eventId = Number(req.params.id);
+    const userId = Number(req.query.userId);
+
+    const existing = await prisma.eventParticipant.findFirst({
+      where: { eventId, userId },
+    });
+
+    res.json({ isJoined: !!existing });
+  } catch (error) {
+    console.error("Error check event:", error);
+    res.status(500).json({ message: "Terjadi kesalahan saat cek event" });
+  }
+};
+
+exports.getParticipants = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Validate ID
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        status: "error",
+        message: "ID event tidak valid",
+      });
+    }
+
+    // Check if event exists
     const event = await prisma.event.findUnique({
       where: { id: parseInt(id) },
     });
 
     if (!event) {
-      return res.status(404).json({ message: "Event tidak ditemukan" });
+      return res.status(404).json({
+        status: "error",
+        message: "Event tidak ditemukan",
+      });
     }
 
-    res.status(200).json(event);
+    // Get participants
+    const participants = await prisma.eventParticipant.findMany({
+      where: { eventId: parseInt(id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+      },
+      orderBy: { joinedAt: "asc" },
+    });
+
+    if (!participants || participants.length === 0) {
+      return res.status(200).json({
+        status: "success",
+        eventId: parseInt(id),
+        participants: [],
+        message: "Belum ada peserta untuk event ini",
+      });
+    }
+
+    // Format participants
+    const formatted = participants.map((p) => ({
+      id: p.user.id,
+      name: p.user.name,
+      email: p.user.email,
+      profilePicture: p.user.profilePicture,
+      joinedAt: p.joinedAt,
+    }));
+
+    res.status(200).json({
+      status: "success",
+      eventId: parseInt(id),
+      participants: formatted,
+      totalParticipants: formatted.length,
+    });
   } catch (error) {
-    console.error("Error get event by ID:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Gagal ambil peserta:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Terjadi kesalahan saat mengambil peserta",
+    });
   }
 };

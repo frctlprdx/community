@@ -16,8 +16,10 @@ import CommunityEvents from "./pages/CommunityEvents";
 import CommunityGalleries from "./pages/CommunityGalleries";
 import CommunityMembers from "./pages/CommunityMember";
 import AddCommunityEvent from "./pages/AddCommunityEvent";
+import EventParticipants from "./pages/EventParticipant";
 import EditEvent from "./pages/EditEvent";
 import AllEvents from "./pages/AllEvents";
+import EventDetail from "./pages/EventDetail";
 import AddCommunityGallery from "./pages/AddCommunityGallery";
 import EditCommunityGallery from "./pages/EditCommunityGallery";
 import LoginHistory from "./pages/LoginHistory";
@@ -38,6 +40,7 @@ function App() {
           <Route path="/gallery/:id" element={<GalleryDetail />} />
           <Route path="/register" element={<Register />} />
           <Route path="/event" element={<AllEvents />} />
+          <Route path="/event/:id" element={<EventDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/registermember" element={<RegisterMember />} />
           <Route path="/registercommunity" element={<RegisterCommunity />} />
@@ -57,6 +60,10 @@ function App() {
             <Route
               path="gallery/edit/:galleryId"
               element={<EditCommunityGallery />}
+            />
+            <Route
+              path="eventsparticipants/:id"
+              element={<EventParticipants />}
             />
             <Route path="galleries" element={<CommunityGalleries />} />
             <Route path="members" element={<CommunityMembers />} />

@@ -34,7 +34,9 @@ export default function CommunityGalleries() {
       try {
         setLoading(true);
         const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/gallery/get/${storedId}`
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/gallery/getCommunity/${storedId}`
         );
 
         if (Array.isArray(res.data.data)) {
@@ -160,7 +162,8 @@ export default function CommunityGalleries() {
               Belum Ada Post Galeri
             </h3>
             <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Mulai dokumentasikan kegiatan komunitas Anda dengan membuat post galeri pertama
+              Mulai dokumentasikan kegiatan komunitas Anda dengan membuat post
+              galeri pertama
             </p>
             <Link
               to="/community/galleries/add"
@@ -219,36 +222,10 @@ export default function CommunityGalleries() {
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                       onClick={() => openModal(post)}
                       onError={(e) => {
-                        e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI0MCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOWNhM2FmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiI+R2FsZXJ5IEltYWdlPC90ZXh0Pgo8L3N2Zz4=";
+                        e.target.src =
+                          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI0MCIgZmlsbD0iI2Y5ZmFmYiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOWNhM2FmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiI+R2FsZXJ5IEltYWdlPC90ZXh0Pgo8L3N2Zz4=";
                       }}
                     />
-                    
-                    {/* View Icon Overlay */}
-                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 flex items-center justify-center transition-all duration-300 group cursor-pointer">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-6 h-6 text-blue-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   {/* Content */}
@@ -355,7 +332,9 @@ export default function CommunityGalleries() {
                     {selectedImage.title || "Untitled Post"}
                   </h3>
                   {selectedImage.description && (
-                    <p className="text-gray-600 mb-3">{selectedImage.description}</p>
+                    <p className="text-gray-600 mb-3">
+                      {selectedImage.description}
+                    </p>
                   )}
                   <p className="text-gray-500 text-sm">
                     Diunggah: {formatDate(selectedImage.uploadedAt)}

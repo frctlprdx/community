@@ -8,6 +8,7 @@ export default function EditCommunityGallery() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState(""); // ✅ tambahin state description
   const [imageUrl, setImageUrl] = useState("");
   const [newImage, setNewImage] = useState(null);
   const [oldImageUrl, setOldImageUrl] = useState("");
@@ -26,6 +27,7 @@ export default function EditCommunityGallery() {
         const gallery = response.data;
 
         setTitle(gallery.title || "");
+        setDescription(gallery.description || ""); // ✅ set description
         setImageUrl(gallery.imageUrl || "");
         setOldImageUrl(gallery.imageUrl || "");
       } catch (error) {
@@ -50,7 +52,7 @@ export default function EditCommunityGallery() {
   const removeNewImage = () => {
     setNewImage(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -91,8 +93,9 @@ export default function EditCommunityGallery() {
         `${import.meta.env.VITE_API_BASE_URL}/gallery/update/${galleryId}`,
         {
           title,
+          description, // ✅ kirim description
           imageUrl: updatedImageUrl,
-          communityId: communityId
+          communityId: communityId,
         }
       );
 
@@ -171,6 +174,21 @@ export default function EditCommunityGallery() {
               />
             </div>
 
+            {/* ✅ Description Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Deskripsi Galeri <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                placeholder="Tuliskan deskripsi singkat galeri..."
+                required
+              />
+            </div>
+
             {/* Current Image Display */}
             {imageUrl && !newImage && (
               <div>
@@ -192,13 +210,10 @@ export default function EditCommunityGallery() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {imageUrl ? "Ganti Gambar (Opsional)" : "Upload Gambar"}
               </label>
-              
+
               {!newImage ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors duration-200">
-                  <label
-                    htmlFor="image-upload"
-                    className="cursor-pointer"
-                  >
+                  <label htmlFor="image-upload" className="cursor-pointer">
                     <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                       <svg
                         className="w-8 h-8 text-gray-400"
@@ -215,9 +230,14 @@ export default function EditCommunityGallery() {
                       </svg>
                     </div>
                     <p className="text-gray-600 mb-2">
-                      <span className="font-medium text-blue-600">Klik untuk upload</span> atau drag & drop
+                      <span className="font-medium text-blue-600">
+                        Klik untuk upload
+                      </span>{" "}
+                      atau drag & drop
                     </p>
-                    <p className="text-sm text-gray-400">PNG, JPG, JPEG hingga 10MB</p>
+                    <p className="text-sm text-gray-400">
+                      PNG, JPG, JPEG hingga 10MB
+                    </p>
                   </label>
                   <input
                     id="image-upload"

@@ -88,32 +88,41 @@ exports.destroyPost = async (req, res) => {
 exports.updatePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, imageUrl, communityId } = req.body;
+    const { title, description, imageUrl, communityId } = req.body;
 
-    // Cek apakah post ada
+    // Validasi ID
+    const galleryId = parseInt(id);
+    if (isNaN(galleryId)) {
+      return res.status(400).json({ message: "Invalid gallery ID" });
+    }
+
+    // Cek apakah gallery ada
     const existing = await prisma.gallery.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: galleryId },
     });
+
     if (!existing) {
       return res.status(404).json({ message: "Gallery post not found" });
     }
 
+    // Update gallery
     const updatedPost = await prisma.gallery.update({
-      where: { id: parseInt(id) },
+      where: { id: galleryId },
       data: {
-        title,
-        imageUrl,
-        communityId: parseInt(communityId),
+        title: title ?? existing.title,
+        description: description ?? existing.description, // ✅ tambahin description
+        imageUrl: imageUrl ?? existing.imageUrl,
+        communityId: communityId ? parseInt(communityId) : existing.communityId,
       },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Gallery post updated successfully",
       data: updatedPost,
     });
   } catch (error) {
     console.error("Error updating gallery:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -180,6 +189,51 @@ exports.getGalleryDetail = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Terjadi kesalahan saat mengambil detail galeri",
+    });
+  }
+};
+
+// Ambil galeri berdasarkan communityId
+exports.getCommunityGallery = async (req, res) => {
+  const { id } = req.params; // id = communityId
+
+  try {
+    const galleries = await prisma.gallery.findMany({
+      where: {
+        communityId: parseInt(id), // filter by communityId
+      },
+      include: {
+        community: {
+          select: {
+            name: true, // ambil nama komunitas
+          },
+        },
+      },
+      orderBy: {
+        uploadedAt: "desc", // urutkan terbaru
+      },
+    });
+
+    // Format agar lebih rapi
+    const formattedGalleries = galleries.map((gallery) => ({
+      id: gallery.id,
+      title: gallery.title,
+      description: gallery.description,
+      imageUrl: gallery.imageUrl,
+      uploadedAt: gallery.uploadedAt,
+      communityId: gallery.communityId,
+      communityName: gallery.community?.name || null,
+    }));
+
+    res.status(200).json({
+      status: "success",
+      data: formattedGalleries,
+    });
+  } catch (error) {
+    console.error("❌ Gagal mengambil galeri komunitas:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Terjadi kesalahan saat mengambil galeri komunitas.",
     });
   }
 };
