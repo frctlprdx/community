@@ -353,14 +353,36 @@ exports.deleteMember = async (req, res) => {
 
 exports.getHistoryLogin = async (req, res) => {
   try {
-    const history = await prisma.loginHistory.findMany({
-      orderBy: { loginAt: "desc" },
-      include: {
-        user: {
-          select: { name: true, email: true, role: true },
+    // Ambil userId unik + waktu login terakhir
+    const grouped = await prisma.loginHistory.groupBy({
+      by: ["userId"],
+      _max: {
+        loginAt: true,
+      },
+      orderBy: {
+        _max: {
+          loginAt: "desc",
         },
       },
     });
+
+    // Ambil detail user berdasarkan hasil groupBy
+    const history = await Promise.all(
+      grouped.map(async (g) => {
+        const user = await prisma.user.findUnique({
+          where: { id: g.userId },
+          select: { id: true, name: true, email: true, role: true }, // ⬅️ tambahkan id di sini
+        });
+
+        return {
+          id: user.id, // ⬅️ id ikut dikembalikan
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          lastLogin: g._max.loginAt,
+        };
+      })
+    );
 
     res.status(200).json(history);
   } catch (err) {
@@ -368,6 +390,36 @@ exports.getHistoryLogin = async (req, res) => {
       message: "Gagal mengambil data login history",
       error: err.message,
     });
+  }
+};
+
+exports.getHistoryDetail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Cari user
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        loginHistories: {
+          orderBy: { loginAt: "desc" },
+          select: { id: true, loginAt: true },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User tidak ditemukan" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Gagal ambil detail history:", error);
+    res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 };
 

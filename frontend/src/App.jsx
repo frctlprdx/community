@@ -20,6 +20,7 @@ import AllEvents from "./pages/AllEvents";
 import AddCommunityGallery from "./pages/AddCommunityGallery";
 import EditCommunityGallery from "./pages/EditCommunityGallery";
 import LoginHistory from "./pages/LoginHistory";
+import HistoryDetail from "./pages/HistoryDetail";
 import ApplyEvent from "./pages/ApplyEvent";
 import AppliedEventCommunity from "./pages/AppliedEventCommunity";
 
@@ -41,7 +42,7 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/appliedevent" element={<ApplyEvent />} />
           <Route path="/profile" element={<Profile />} />
-          
+
           {/* Route untuk detail komunitas - TAMBAHAN BARU */}
           <Route path="/community/:name" element={<CommunityDetail />} />
 
@@ -58,6 +59,7 @@ function App() {
             <Route path="galleries" element={<CommunityGalleries />} />
             <Route path="members" element={<CommunityMembers />} />
             <Route path="historylogin" element={<LoginHistory />} />
+            <Route path="history/:id" element={<HistoryDetail />} />
             <Route path="appliedevent" element={<AppliedEventCommunity />} />
           </Route>
         </Routes>

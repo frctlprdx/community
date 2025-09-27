@@ -11,6 +11,7 @@ router.get("/check-membership/:communityId/:userId", communityController.checkMe
 router.delete("/delete/:id", communityController.deleteCommunity); //Delete Community (Admin)
 router.put("/update/:id", communityController.updateCommunity);
 router.get("/gethistory", communityController.getHistoryLogin);
+router.get("/gethistorydetail/:id", communityController.getHistoryDetail);
 router.post("/applyevent", communityController.applyEvent);
 router.get("/applied-events", communityController.getAppliedEvents);
 router.delete("/applied-events/:id", communityController.deleteAppliedEvent);
