@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CountdownTimer from "../components/countdownTimer";
 
 export default function AllEvents() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -23,6 +25,10 @@ export default function AllEvents() {
     fetchEvents();
   }, []);
 
+  const handleAppliedEventsClick = () => {
+    navigate("/appliedevent");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -36,10 +42,36 @@ export default function AllEvents() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-            Semua Event
-          </h2>
-          <div className="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex-1"></div>
+            <div className="flex-1 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
+                Semua Event
+              </h2>
+              <div className="w-24 h-1 bg-blue-600 mx-auto mb-6"></div>
+            </div>
+            <div className="flex-1 flex justify-end">
+              <button
+                onClick={handleAppliedEventsClick}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                  />
+                </svg>
+                Ajukan Event
+              </button>
+            </div>
+          </div>
           <p className="text-lg text-gray-600">
             Ikuti berbagai event menarik dari komunitas di Kota Semarang
           </p>

@@ -771,15 +771,14 @@ function Home() {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-blue-400 text-white">
         <div className="max-w-4xl mx-auto text-center px-6">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Punya Komunitas di Semarang?
+            Ingin Gabung Komunitas Di Semarang?
           </h2>
           <p className="text-xl mb-8 text-blue-100">
-            Daftarkan komunitasmu dan bergabung dengan ratusan komunitas lain
-            untuk menciptakan gerakan positif di Kota Semarang.
+            Bergabunglah ke Komunitas sesuai dengan minatu dan bakatmu!
           </p>
           <Link to="/register">
             <button className="cursor-pointer px-8 py-4 bg-white text-blue-600 font-semibold rounded-full shadow-lg hover:bg-gray-50 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-              Daftarkan Komunitas Sekarang
+              Daftar Komunitas Sekarang
             </button>
           </Link>
         </div>
