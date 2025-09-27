@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Upload } from "lucide-react";
-
 import axios from "axios";
 import { supabase } from "../../supabaseClient";
 
@@ -14,12 +12,14 @@ export default function EditCommunityGallery() {
   const [newImage, setNewImage] = useState(null);
   const [oldImageUrl, setOldImageUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchGallery = async () => {
       try {
+        setInitialLoading(true);
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/gallery/getdetail/${galleryId}`
         );
@@ -31,7 +31,9 @@ export default function EditCommunityGallery() {
       } catch (error) {
         console.error("Gagal mengambil data galeri:", error);
         alert("Data galeri tidak ditemukan.");
-        navigate("/community/gallery", { replace: true });
+        navigate("/community/galleries", { replace: true });
+      } finally {
+        setInitialLoading(false);
       }
     };
 
@@ -42,6 +44,13 @@ export default function EditCommunityGallery() {
     const file = e.target.files[0];
     if (file) {
       setNewImage(file);
+    }
+  };
+
+  const removeNewImage = () => {
+    setNewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -88,6 +97,7 @@ export default function EditCommunityGallery() {
       );
 
       alert("Galeri berhasil diperbarui.");
+      navigate("/community/galleries");
     } catch (err) {
       console.error("Gagal update galeri:", err);
       alert("Gagal update galeri. Silakan coba lagi.");
@@ -96,70 +106,236 @@ export default function EditCommunityGallery() {
     }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Memuat data galeri...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="bg-[#0e0e1f]/80 p-8 rounded-lg shadow-lg w-full max-w-lg border border-purple-500 oxanium-regular">
-        <h2 className="text-2xl text-center text-white font-bold mb-6">
-          Edit Galeri Komunitas
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4 text-white">
-          <div>
-            <label className="block mb-1">Judul Galeri</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 rounded bg-black/40 border border-purple-500 focus:outline-none"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block mb-2 text-sm font-medium">
-              {imageUrl ? "Ganti Gambar Galeri" : "Upload Gambar Galeri"}
-            </label>
-            <div className="relative">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                ref={fileInputRef}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center w-full h-12 px-4 border-2 border-dashed border-purple-500 rounded-lg hover:border-[#00FFFF] hover:bg-black/20 transition-all duration-200 cursor-pointer"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 py-8">
+      <div className="max-w-2xl mx-auto px-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <button
+              onClick={() => navigate("/community/galleries")}
+              className="mr-4 p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-center space-x-2 text-gray-300">
-                  <Upload size={20} className="text-[#00FFFF]" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Edit <span className="text-blue-600">Galeri</span>
+              </h1>
+              <div className="w-24 h-1 bg-blue-600"></div>
+            </div>
+          </div>
+          <p className="text-gray-600 ml-14">
+            Perbarui informasi galeri komunitas Anda
+          </p>
+        </div>
 
-                  <span className="text-sm font-medium">
-                    {newImage ? newImage.name : "Pilih gambar baru"}
-                  </span>
+        {/* Form */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            {/* Title Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Judul Galeri <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                placeholder="Masukkan judul galeri..."
+                required
+              />
+            </div>
+
+            {/* Current Image Display */}
+            {imageUrl && !newImage && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gambar Saat Ini
+                </label>
+                <div className="relative">
+                  <img
+                    src={imageUrl}
+                    alt="Current gallery"
+                    className="w-full h-64 object-cover rounded-lg border border-gray-200"
+                  />
                 </div>
               </div>
-            </div>
-          </div>
+            )}
 
-          {imageUrl && (
+            {/* New Image Upload */}
             <div>
-              <p className="text-sm mb-1">Gambar Saat Ini:</p>
-              <img
-                src={imageUrl}
-                alt="Preview"
-                className="w-full h-48 object-cover rounded border border-purple-300"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {imageUrl ? "Ganti Gambar (Opsional)" : "Upload Gambar"}
+              </label>
+              
+              {!newImage ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors duration-200">
+                  <label
+                    htmlFor="image-upload"
+                    className="cursor-pointer"
+                  >
+                    <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v6m0-6l-3 3m3-3l3 3m-3-6V4"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-gray-600 mb-2">
+                      <span className="font-medium text-blue-600">Klik untuk upload</span> atau drag & drop
+                    </p>
+                    <p className="text-sm text-gray-400">PNG, JPG, JPEG hingga 10MB</p>
+                  </label>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    ref={fileInputRef}
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <div className="relative">
+                  <img
+                    src={URL.createObjectURL(newImage)}
+                    alt="New preview"
+                    className="w-full h-64 object-cover rounded-lg border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeNewImage}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                  <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 flex items-center">
+                      <svg
+                        className="w-4 h-4 text-green-500 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      Gambar baru: {newImage?.name}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-bold py-2 rounded transition duration-300"
-          >
-            {loading ? "Menyimpan..." : "Simpan Perubahan"}
-          </button>
-        </form>
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-6 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => navigate("/community/galleries")}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center"
+              >
+                {loading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Simpan Perubahan
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

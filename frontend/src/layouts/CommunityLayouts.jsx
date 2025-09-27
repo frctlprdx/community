@@ -5,7 +5,7 @@ export default function CommunityLayout() {
   return (
     <>
       <CommunitySidebar />
-      <main className="min-h-screen flex-1 p-6 pt-20 text-white relative z-0 bg-gradient-to-br from-[#bg-[#0F0F0F]] via-[#bg-[#0F0F0F]] to-[#8A2BE2]">
+      <main className="min-h-screen flex-1 p-6 pt-20 text-white relative z-0 ">
         <Outlet />
       </main>
     </>
