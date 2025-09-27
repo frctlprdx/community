@@ -47,6 +47,7 @@ model Community {
 model Gallery {
   id          Int       @id @default(autoincrement())
   title       String
+  description String?
   imageUrl    String?
   uploadedAt  DateTime  @default(now())
 

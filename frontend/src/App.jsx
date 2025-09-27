@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Gallery from "./pages/Gallery";
+import GalleryDetail from "./pages/GalleryDetail";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -34,6 +35,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/gallery/:id" element={<GalleryDetail />} />
           <Route path="/register" element={<Register />} />
           <Route path="/event" element={<AllEvents />} />
           <Route path="/login" element={<Login />} />

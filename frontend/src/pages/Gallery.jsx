@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 function Gallery() {
   const [galleries, setGalleries] = useState([]);
@@ -27,10 +28,8 @@ function Gallery() {
     fetchGallery();
   }, []);
 
-  // Function to format date from uploadedAt
   const formatDate = (dateString) => {
     if (!dateString) return "Tanggal tidak tersedia";
-
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString("id-ID", {
@@ -58,7 +57,6 @@ function Gallery() {
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-16 px-6 mt-20">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
             Galeri Komunitas
@@ -69,15 +67,14 @@ function Gallery() {
           </p>
         </div>
 
-        {/* Gallery Grid */}
         {galleries.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {galleries.map((item) => (
-              <div
+              <Link
+                to={`/gallery/${item.id}`} // 🔥 arahkan ke detail
                 key={item.id}
                 className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-3 transition-all duration-500 overflow-hidden border border-gray-100"
               >
-                {/* Image Container */}
                 <div className="relative overflow-hidden">
                   <img
                     src={item.imageUrl}
@@ -88,22 +85,21 @@ function Gallery() {
                         "https://via.placeholder.com/400x300?text=Image+Not+Found";
                     }}
                   />
-                  {/* Community Badge */}
                   <div className="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
                     {item.communityName}
                   </div>
-                  {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
-                {/* Content */}
                 <div className="p-6">
                   <h3 className="font-bold text-xl text-gray-900 mb-3 group-hover:text-blue-600 transition-colors duration-300">
                     {item.title}
                   </h3>
-
-                  {/* Upload Date */}
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
+                  {/* Description singkat */}
+                  <p className="text-gray-600 text-sm line-clamp-3 mb-3">
+                    {item.description || "Tidak ada deskripsi"}
+                  </p>
+                  <div className="flex items-center text-sm text-gray-500">
                     <svg
                       className="w-4 h-4 mr-2"
                       fill="none"
@@ -120,7 +116,7 @@ function Gallery() {
                     <span>{formatDate(item.uploadedAt)}</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (

@@ -5,13 +5,14 @@ import { supabase } from "../../supabaseClient";
 
 export default function AddCommunityGallery() {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState(""); // NEW
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0] || null;
     setImageFile(file);
     if (file) {
       setPreview(URL.createObjectURL(file));
@@ -48,7 +49,6 @@ export default function AddCommunityGallery() {
 
     try {
       if (!communityId) throw new Error("communityId tidak ditemukan.");
-
       if (!imageFile) {
         alert("Gambar wajib diisi.");
         setLoading(false);
@@ -57,10 +57,11 @@ export default function AddCommunityGallery() {
 
       const imageUrl = await uploadImageToSupabase(imageFile);
 
-      const res = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/gallery/post`,
         {
           title,
+          description, // NEW
           imageUrl,
           communityId,
         },
@@ -72,13 +73,10 @@ export default function AddCommunityGallery() {
       );
 
       alert("Gallery berhasil ditambahkan!");
-
-      // Reset form
       setTitle("");
+      setDescription(""); // reset
       setImageFile(null);
       setPreview(null);
-
-      // Navigate back to gallery
       navigate("/community/gallery");
     } catch (error) {
       console.error("Gagal menambahkan gallery:", error);
@@ -151,18 +149,29 @@ export default function AddCommunityGallery() {
               />
             </div>
 
+            {/* Description Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Deskripsi <span className="text-gray-400">(opsional)</span>
+              </label>
+              <textarea
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                placeholder="Tambahkan deskripsi gambar..."
+                rows={4}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
             {/* Image Upload Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Gambar <span className="text-red-500">*</span>
               </label>
-              
+
               {!preview ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors duration-200">
-                  <label
-                    htmlFor="image-upload"
-                    className="cursor-pointer"
-                  >
+                  <label htmlFor="image-upload" className="cursor-pointer">
                     <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                       <svg
                         className="w-8 h-8 text-gray-400"
@@ -179,9 +188,14 @@ export default function AddCommunityGallery() {
                       </svg>
                     </div>
                     <p className="text-gray-600 mb-2">
-                      <span className="font-medium text-blue-600">Klik untuk upload</span> atau drag & drop
+                      <span className="font-medium text-blue-600">
+                        Klik untuk upload
+                      </span>{" "}
+                      atau drag & drop
                     </p>
-                    <p className="text-sm text-gray-400">PNG, JPG, JPEG hingga 10MB</p>
+                    <p className="text-sm text-gray-400">
+                      PNG, JPG, JPEG hingga 10MB
+                    </p>
                   </label>
                   <input
                     id="image-upload"

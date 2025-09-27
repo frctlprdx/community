@@ -46,10 +46,11 @@ exports.getAllPosts = async (req, res) => {
     const formattedGalleries = galleries.map((gallery) => ({
       id: gallery.id,
       title: gallery.title,
+      description: gallery.description, // 🔥 tambahkan description
       imageUrl: gallery.imageUrl,
       uploadedAt: gallery.uploadedAt,
       communityId: gallery.communityId,
-      communityName: gallery.community?.name || null, // langsung jadi property baru
+      communityName: gallery.community?.name || null,
     }));
 
     res.status(200).json(formattedGalleries);
@@ -120,18 +121,32 @@ exports.getGalleryById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const galleries = await prisma.gallery.findMany({
+    const gallery = await prisma.gallery.findUnique({
       where: {
-        communityId: parseInt(id),
+        id: parseInt(id), // ambil berdasarkan ID galeri, bukan communityId
       },
-      orderBy: {
-        uploadedAt: "desc", // optional: untuk urutkan terbaru ke lama
+      include: {
+        community: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
 
+    if (!gallery) {
+      return res.status(404).json({
+        status: "error",
+        message: "Galeri tidak ditemukan",
+      });
+    }
+
     res.json({
       status: "success",
-      data: galleries,
+      data: {
+        ...gallery,
+        communityName: gallery.community?.name || null, // flatten community
+      },
     });
   } catch (error) {
     console.error("❌ Gagal mengambil galeri:", error);

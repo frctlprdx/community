@@ -25,7 +25,7 @@ function Navbar() {
     { to: "/", label: "Home" },
     { to: "/gallery", label: "Galeri" },
     { to: "/event", label: "Events" },
-    { to: "/register", label: "Gabung" }, // ubah daftar -> gabung
+    { to: "/register", label: "Komunitas" }, // ubah daftar -> gabung
   ];
 
   return (
