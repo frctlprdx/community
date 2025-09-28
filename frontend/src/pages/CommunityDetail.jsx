@@ -13,6 +13,7 @@ function CommunityDetail() {
 
   // Get user ID from localStorage
   const userId = localStorage.getItem("id");
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const fetchCommunityDetail = async () => {
@@ -21,7 +22,9 @@ function CommunityDetail() {
         setError(null);
         const decodedName = decodeURIComponent(name);
         const res = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/community/getdetail/${encodeURIComponent(decodedName)}`
+          `${
+            import.meta.env.VITE_API_BASE_URL
+          }/community/getdetail/${encodeURIComponent(decodedName)}`
         );
         setCommunity(res.data);
 
@@ -31,7 +34,11 @@ function CommunityDetail() {
         }
       } catch (error) {
         console.error("Error fetching community detail:", error);
-        setError(error.response?.status === 404 ? "Komunitas tidak ditemukan" : "Gagal memuat detail komunitas");
+        setError(
+          error.response?.status === 404
+            ? "Komunitas tidak ditemukan"
+            : "Gagal memuat detail komunitas"
+        );
       } finally {
         setLoading(false);
       }
@@ -45,7 +52,9 @@ function CommunityDetail() {
   const checkMembership = async (communityId) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/community/check-membership/${communityId}/${userId}`
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/community/check-membership/${communityId}/${userId}`
       );
       setIsAlreadyMember(response.data.isMember);
     } catch (error) {
@@ -55,13 +64,15 @@ function CommunityDetail() {
 
   const handleJoinCommunity = async () => {
     if (!userId) {
-      setJoinStatus('error');
-      setError("Silakan login terlebih dahulu untuk bergabung dengan komunitas");
+      setJoinStatus("error");
+      setError(
+        "Silakan login terlebih dahulu untuk bergabung dengan komunitas"
+      );
       return;
     }
 
     if (!community?.id) {
-      setJoinStatus('error');
+      setJoinStatus("error");
       setError("Data komunitas tidak tersedia");
       return;
     }
@@ -75,31 +86,33 @@ function CommunityDetail() {
         `${import.meta.env.VITE_API_BASE_URL}/community/join`,
         {
           userId: parseInt(userId),
-          communityId: community.id
+          communityId: community.id,
         }
       );
 
       if (response.data.success) {
-        setJoinStatus('success');
+        setJoinStatus("success");
         setIsAlreadyMember(true);
         // Update member count locally
-        setCommunity(prev => ({
+        setCommunity((prev) => ({
           ...prev,
-          memberCount: prev.memberCount + 1
+          memberCount: prev.memberCount + 1,
         }));
       }
     } catch (error) {
       console.error("Error joining community:", error);
-      
+
       if (error.response?.status === 409) {
-        setJoinStatus('already_joined');
+        setJoinStatus("already_joined");
         setIsAlreadyMember(true);
       } else if (error.response?.status === 404) {
-        setJoinStatus('error');
+        setJoinStatus("error");
         setError("Komunitas atau user tidak ditemukan");
       } else {
-        setJoinStatus('error');
-        setError(error.response?.data?.message || "Gagal bergabung dengan komunitas");
+        setJoinStatus("error");
+        setError(
+          error.response?.data?.message || "Gagal bergabung dengan komunitas"
+        );
       }
     } finally {
       setIsJoining(false);
@@ -148,7 +161,8 @@ function CommunityDetail() {
               </div>
               <h2 className="text-xl font-bold text-gray-800 mb-2">{error}</h2>
               <p className="text-gray-600 mb-6">
-                Komunitas yang Anda cari mungkin tidak tersedia atau telah dihapus.
+                Komunitas yang Anda cari mungkin tidak tersedia atau telah
+                dihapus.
               </p>
               <Link
                 to="/register"
@@ -192,31 +206,65 @@ function CommunityDetail() {
         {/* Join Status Messages */}
         {joinStatus && (
           <div className="mb-6">
-            {joinStatus === 'success' && (
+            {joinStatus === "success" && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-5 h-5 text-green-600 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
-                  <p className="text-green-800 font-medium">Berhasil bergabung dengan komunitas!</p>
+                  <p className="text-green-800 font-medium">
+                    Berhasil bergabung dengan komunitas!
+                  </p>
                 </div>
               </div>
             )}
-            {joinStatus === 'already_joined' && (
+            {joinStatus === "already_joined" && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  <svg
+                    className="w-5 h-5 text-yellow-600 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
                   </svg>
-                  <p className="text-yellow-800 font-medium">Anda sudah menjadi member komunitas ini</p>
+                  <p className="text-yellow-800 font-medium">
+                    Anda sudah menjadi member komunitas ini
+                  </p>
                 </div>
               </div>
             )}
-            {joinStatus === 'error' && error && (
+            {joinStatus === "error" && error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  <svg
+                    className="w-5 h-5 text-red-600 mr-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
                   </svg>
                   <p className="text-red-800 font-medium">{error}</p>
                 </div>
@@ -250,11 +298,13 @@ function CommunityDetail() {
                       d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
-                  <h2 className="text-3xl font-bold opacity-90">{community.name}</h2>
+                  <h2 className="text-3xl font-bold opacity-90">
+                    {community.name}
+                  </h2>
                 </div>
               </div>
             )}
-            
+
             {/* Category Badge */}
             {community.category && (
               <div className="absolute top-6 left-6">
@@ -268,8 +318,18 @@ function CommunityDetail() {
             {isAlreadyMember && (
               <div className="absolute top-6 right-6">
                 <span className="px-4 py-2 bg-green-500/90 backdrop-blur-sm text-white text-sm font-semibold rounded-full flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                   Member
                 </span>
@@ -283,7 +343,7 @@ function CommunityDetail() {
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                 {community.name}
               </h1>
-              
+
               {/* Quick Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="flex items-center gap-4">
@@ -457,7 +517,10 @@ function CommunityDetail() {
                       <div>
                         <p className="text-sm text-gray-600">WhatsApp</p>
                         <a
-                          href={`https://wa.me/${community.phone_number.replace(/\D/g, '')}`}
+                          href={`https://wa.me/${community.phone_number.replace(
+                            /\D/g,
+                            ""
+                          )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-800 font-medium"
@@ -571,17 +634,18 @@ function CommunityDetail() {
             <div className="mt-8 p-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
               <div className="text-center">
                 <h3 className="text-xl font-bold mb-2">
-                  {isAlreadyMember ? "Anda Sudah Tergabung!" : "Tertarik Bergabung?"}
+                  {isAlreadyMember
+                    ? "Anda Sudah Tergabung!"
+                    : "Tertarik Bergabung?"}
                 </h3>
                 <p className="mb-6 opacity-90">
-                  {isAlreadyMember 
+                  {isAlreadyMember
                     ? "Terima kasih sudah menjadi bagian dari komunitas ini"
-                    : "Bergabung dengan komunitas ini untuk mendapatkan akses penuh ke semua fitur dan kegiatan"
-                  }
+                    : "Bergabung dengan komunitas ini untuk mendapatkan akses penuh ke semua fitur dan kegiatan"}
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  {!isAlreadyMember && userId && (
+                  {!isAlreadyMember && userId && role != "COMMUNITY" && (
                     <button
                       onClick={handleJoinCommunity}
                       disabled={isJoining}
@@ -589,9 +653,25 @@ function CommunityDetail() {
                     >
                       {isJoining ? (
                         <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          <svg
+                            className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                           </svg>
                           Bergabung...
                         </>
@@ -637,6 +717,28 @@ function CommunityDetail() {
                       Login untuk Bergabung
                     </Link>
                   )}
+                  {role == "COMMUNITY" && role == "ADMIN" && (
+                    <Link
+                      to="/login"
+                      onClick={(e) => e.preventDefault()} // biar nggak bisa diklik
+                      className="inline-flex items-center justify-center px-8 py-3 bg-gray-300 text-gray-500 font-bold rounded-lg shadow cursor-not-allowed"
+                    >
+                      <svg
+                        className="w-5 h-5 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      Login Sebagai Member
+                    </Link>
+                  )}
 
                   {/* Contact buttons */}
                   {community.email && (
@@ -662,7 +764,12 @@ function CommunityDetail() {
                   )}
                   {community.phone_number && (
                     <a
-                      href={`https://wa.me/${community.phone_number.replace(/\D/g, '')}?text=Halo, saya tertarik untuk bergabung dengan komunitas ${community.name}`}
+                      href={`https://wa.me/${community.phone_number.replace(
+                        /\D/g,
+                        ""
+                      )}?text=Halo, saya tertarik untuk bergabung dengan komunitas ${
+                        community.name
+                      }`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center px-6 py-3 bg-green-500 text-white font-medium rounded-lg shadow hover:bg-green-600 transition-colors"

@@ -85,28 +85,92 @@ exports.deleteEvent = async (req, res) => {
 exports.updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, date, imageUrl } = req.body;
+    const {
+      title,
+      description,
+      date,
+      imageUrl,
+      location,
+      price,
+      maxParticipants,
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !description || !date || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, description, date, and location are required",
+      });
+    }
+
+    // Validate ID
+    if (!id || isNaN(parseInt(id))) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid event ID",
+      });
+    }
+
+    // Check if event exists
+    const existingEvent = await prisma.event.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!existingEvent) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    // Prepare update data
+    const updateData = {
+      title,
+      description,
+      date: new Date(date),
+      imageUrl,
+      location,
+      price: parseFloat(price) || 0,
+      maxParticipants:
+        maxParticipants === "" || maxParticipants === null
+          ? null
+          : parseInt(maxParticipants),
+    };
 
     const updatedEvent = await prisma.event.update({
       where: { id: parseInt(id) },
-      data: {
-        title,
-        description,
-        date: new Date(date),
-        imageUrl,
-      },
+      data: updateData,
     });
 
     res.status(200).json({
+      success: true,
       message: "Event updated successfully",
       data: updatedEvent,
     });
   } catch (error) {
     console.error("Error updating event:", error);
-    res.status(500).json({ message: "Internal server error" });
+
+    // Handle Prisma errors
+    if (error.code === "P2002") {
+      return res.status(400).json({
+        success: false,
+        message: "Event with this title already exists",
+      });
+    }
+
+    if (error.code === "P2025") {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
-
 exports.getCommunityEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -140,12 +204,12 @@ exports.getCommunityEvent = async (req, res) => {
 exports.getEventById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Validate ID
     if (!id || isNaN(parseInt(id))) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "ID event tidak valid" 
+        message: "ID event tidak valid",
       });
     }
 
@@ -167,9 +231,9 @@ exports.getEventById = async (req, res) => {
     });
 
     if (!event) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        message: "Event tidak ditemukan" 
+        message: "Event tidak ditemukan",
       });
     }
 
@@ -188,21 +252,14 @@ exports.getEventById = async (req, res) => {
       location: event.location || null,
       price: event.price || 0,
       maxParticipants: event.maxParticipants || null,
-      category: event.category || null,
-      requirements: event.requirements || null,
-      contactEmail: event.contactEmail || null,
-      contactPhone: event.contactPhone || null,
-      startDate: event.startDate || event.date,
-      endDate: event.endDate || null,
-      registrationDeadline: event.registrationDeadline || null,
     };
 
     res.status(200).json(formattedEvent);
   } catch (error) {
     console.error("Error get event by ID:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: "Internal server error" 
+      message: "Internal server error",
     });
   }
 };
@@ -270,7 +327,10 @@ exports.joinCommunityEvent = async (req, res) => {
     }
 
     // Check if event is full (if maxParticipants is set)
-    if (event.maxParticipants && event._count.eventParticipants >= event.maxParticipants) {
+    if (
+      event.maxParticipants &&
+      event._count.eventParticipants >= event.maxParticipants
+    ) {
       return res.status(400).json({
         success: false,
         message: "Event sudah penuh",
@@ -279,15 +339,15 @@ exports.joinCommunityEvent = async (req, res) => {
 
     // Create new participant
     const participant = await prisma.eventParticipant.create({
-      data: { 
-        eventId: parseInt(eventId), 
-        userId: parseInt(userId) 
+      data: {
+        eventId: parseInt(eventId),
+        userId: parseInt(userId),
       },
     });
 
-    res.status(201).json({ 
+    res.status(201).json({
       success: true,
-      message: "Berhasil mendaftar event", 
+      message: "Berhasil mendaftar event",
       participant,
       isRegistered: true,
     });
@@ -303,9 +363,9 @@ exports.joinCommunityEvent = async (req, res) => {
       });
     }
 
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan saat mendaftar event" 
+      message: "Terjadi kesalahan saat mendaftar event",
     });
   }
 };
@@ -314,9 +374,14 @@ exports.joinCommunityEvent = async (req, res) => {
 exports.checkRegistration = async (req, res) => {
   try {
     const { eventId, userId } = req.params;
-    
+
     // Validate parameters
-    if (!eventId || !userId || isNaN(parseInt(eventId)) || isNaN(parseInt(userId))) {
+    if (
+      !eventId ||
+      !userId ||
+      isNaN(parseInt(eventId)) ||
+      isNaN(parseInt(userId))
+    ) {
       return res.status(400).json({
         success: false,
         message: "Event ID dan User ID harus berupa angka yang valid",
@@ -332,15 +397,15 @@ exports.checkRegistration = async (req, res) => {
       },
     });
 
-    res.json({ 
+    res.json({
       success: true,
-      isRegistered: !!existingParticipant 
+      isRegistered: !!existingParticipant,
     });
   } catch (error) {
     console.error("Error checking registration:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan saat mengecek status registrasi" 
+      message: "Terjadi kesalahan saat mengecek status registrasi",
     });
   }
 };

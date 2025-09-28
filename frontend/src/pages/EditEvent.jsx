@@ -12,6 +12,9 @@ export default function EditEvent() {
     description: "",
     date: "",
     imageUrl: "",
+    location: "",
+    price: 0,
+    maxParticipants: "",
   });
 
   const [newImage, setNewImage] = useState(null);
@@ -28,8 +31,18 @@ export default function EditEvent() {
           const res = await axios.get(
             `${import.meta.env.VITE_API_BASE_URL}/event/eventdetail/${eventId}`
           );
-          setForm(res.data);
-          setOldImageUrl(res.data.imageUrl);
+
+          // Set form data dengan semua field yang ada
+          setForm({
+            title: res.data.title || "",
+            description: res.data.description || "",
+            date: res.data.date ? res.data.date.slice(0, 16) : "", // Format untuk datetime-local
+            imageUrl: res.data.imageUrl || "",
+            location: res.data.location || "",
+            price: res.data.price || 0,
+            maxParticipants: res.data.maxParticipants || "",
+          });
+          setOldImageUrl(res.data.imageUrl || "");
         } catch (err) {
           console.error("Gagal mengambil data event:", err);
           alert("Event tidak ditemukan.");
@@ -43,7 +56,16 @@ export default function EditEvent() {
   }, [eventId, navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Handle numeric fields
+    if (name === "price") {
+      setForm({ ...form, [name]: parseFloat(value) || 0 });
+    } else if (name === "maxParticipants") {
+      setForm({ ...form, [name]: value === "" ? "" : parseInt(value) || "" });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -92,14 +114,21 @@ export default function EditEvent() {
         }
       }
 
+      // Prepare data untuk update
+      const updateData = {
+        title: form.title,
+        description: form.description,
+        date: form.date,
+        imageUrl: imageUrl,
+        location: form.location,
+        price: form.price,
+        maxParticipants:
+          form.maxParticipants === "" ? null : form.maxParticipants,
+      };
+
       await axios.put(
         `${import.meta.env.VITE_API_BASE_URL}/event/update/${eventId}`,
-        {
-          title: form.title,
-          description: form.description,
-          date: form.date,
-          imageUrl: imageUrl,
-        }
+        updateData
       );
 
       setMessage("success");
@@ -254,11 +283,74 @@ export default function EditEvent() {
               <input
                 type="datetime-local"
                 name="date"
-                value={form.date.slice(0, 16)} // format YYYY-MM-DDTHH:MM
+                value={form.date}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
                 required
               />
+            </div>
+
+            {/* Location Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lokasi Event <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                placeholder="Masukkan lokasi event..."
+                required
+              />
+            </div>
+
+            {/* Price and Max Participants Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Price Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Harga Tiket
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-3 text-gray-500">
+                    Rp
+                  </span>
+                  <input
+                    type="number"
+                    name="price"
+                    value={form.price}
+                    onChange={handleChange}
+                    min="0"
+                    step="1000"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                    placeholder="0"
+                  />
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Masukkan 0 untuk event gratis
+                </p>
+              </div>
+
+              {/* Max Participants Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Maksimal Peserta
+                </label>
+                <input
+                  type="number"
+                  name="maxParticipants"
+                  value={form.maxParticipants}
+                  onChange={handleChange}
+                  min="1"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
+                  placeholder="Tidak terbatas"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Kosongkan untuk tidak membatasi peserta
+                </p>
+              </div>
             </div>
 
             {/* Current Image Display */}
@@ -282,13 +374,10 @@ export default function EditEvent() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {form.imageUrl ? "Ganti Gambar (Opsional)" : "Upload Gambar"}
               </label>
-              
+
               {!newImage ? (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors duration-200">
-                  <label
-                    htmlFor="image-upload"
-                    className="cursor-pointer"
-                  >
+                  <label htmlFor="image-upload" className="cursor-pointer">
                     <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                       <svg
                         className="w-8 h-8 text-gray-400"
@@ -305,9 +394,14 @@ export default function EditEvent() {
                       </svg>
                     </div>
                     <p className="text-gray-600 mb-2">
-                      <span className="font-medium text-blue-600">Klik untuk upload</span> atau drag & drop
+                      <span className="font-medium text-blue-600">
+                        Klik untuk upload
+                      </span>{" "}
+                      atau drag & drop
                     </p>
-                    <p className="text-sm text-gray-400">PNG, JPG, JPEG hingga 10MB</p>
+                    <p className="text-sm text-gray-400">
+                      PNG, JPG, JPEG hingga 10MB
+                    </p>
                   </label>
                   <input
                     id="image-upload"

@@ -81,6 +81,9 @@ model Event {
   description String    @db.LongText
   date        DateTime
   imageUrl    String?
+  location String?
+  price Int?
+  maxParticipants Int?
   createdAt   DateTime  @default(now())
 
   createdBy   Community? @relation("EventCreator", fields: [createdById], references: [id])
