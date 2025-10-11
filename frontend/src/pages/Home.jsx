@@ -18,8 +18,12 @@ function Home() {
     const storedRole = localStorage.getItem("role");
     setRole(storedRole);
 
-    if (role === "COMMUNITY" || role === "ADMIN") {
+    if (role === "COMMUNITY") {
       navigate("/community/members", { replace: true });
+      return;
+    }
+    if (role === "ADMIN") {
+      navigate("/admin/dashboard", { replace: true });
       return;
     }
   }, [role, navigate]);

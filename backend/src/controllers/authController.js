@@ -356,7 +356,7 @@ exports.login = async (req, res) => {
     }
 
     // Cek role sebelum simpan login history
-    if (user.role === "MEMBER") {
+    if (user.role === "MEMBER" || user.role === "COMMUNITY") {
       await prisma.loginHistory.create({
         data: {
           userId: user.id,

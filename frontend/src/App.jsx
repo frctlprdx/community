@@ -5,7 +5,6 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Gallery from "./pages/Gallery";
 import GalleryDetail from "./pages/GalleryDetail";
-import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import CommunityDetail from "./pages/CommunityDetail";
@@ -26,6 +25,9 @@ import LoginHistory from "./pages/LoginHistory";
 import HistoryDetail from "./pages/HistoryDetail";
 import ApplyEvent from "./pages/ApplyEvent";
 import AppliedEventCommunity from "./pages/AppliedEventCommunity";
+import AdminLayout from "./layouts/AdminLayouts";
+import EventManagement from "./pages/EventManagement";
+import GalleryManagement from "./pages/GalleryManagement";
 
 function App() {
   return (
@@ -44,7 +46,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/registermember" element={<RegisterMember />} />
           <Route path="/registercommunity" element={<RegisterCommunity />} />
-          <Route path="/admin" element={<Admin />} />
           <Route path="/appliedevent" element={<ApplyEvent />} />
           <Route path="/profile" element={<Profile />} />
 
@@ -70,6 +71,12 @@ function App() {
             <Route path="historylogin" element={<LoginHistory />} />
             <Route path="history/:id" element={<HistoryDetail />} />
             <Route path="appliedevent" element={<AppliedEventCommunity />} />
+          </Route>
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<LoginHistory />} />
+            <Route path="eventmanagement" element={<EventManagement />} />
+            <Route path="gallerymanagement" element={<GalleryManagement />} />
           </Route>
         </Routes>
       </div>

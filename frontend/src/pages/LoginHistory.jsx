@@ -26,7 +26,7 @@ export default function LoginHistory() {
     const storedRole = localStorage.getItem("role");
     setRole(storedRole);
 
-    if (storedRole !== "COMMUNITY") {
+    if (storedRole !== "ADMIN") {
       navigate("/", { replace: true });
       return;
     }
@@ -45,7 +45,7 @@ export default function LoginHistory() {
     });
   };
 
-  if (role !== "COMMUNITY") {
+  if (role !== "ADMIN") {
     return null;
   }
 
