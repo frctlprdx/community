@@ -13,7 +13,6 @@ const PORT = process.env.PORT || 3000;
 
 // Allowed origins
 const allowedOrigins = [
-  "http://localhost:5173",
   "https://community-bice.vercel.app"
 ];
 
