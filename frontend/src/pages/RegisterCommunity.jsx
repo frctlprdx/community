@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Users, Mail, Phone, Lock, FileText, Camera, CheckCircle, AlertCircle, Loader2, Link, Tag } from "lucide-react";
+import {
+  Users,
+  Mail,
+  Phone,
+  Lock,
+  FileText,
+  Camera,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Link,
+  Tag,
+} from "lucide-react";
 import { supabase } from "../../supabase";
 
 export default function RegisterCommunity() {
@@ -21,7 +33,7 @@ export default function RegisterCommunity() {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    
+
     if (name === "profilePicture") {
       setFormData({ ...formData, [name]: files[0] });
     } else {
@@ -53,12 +65,16 @@ export default function RegisterCommunity() {
       newErrors.password = "Password minimal 8 karakter";
     }
 
-    if (formData.phone_number && !/^[0-9+\-\s()]+$/.test(formData.phone_number)) {
+    if (
+      formData.phone_number &&
+      !/^[0-9+\-\s()]+$/.test(formData.phone_number)
+    ) {
       newErrors.phone_number = "Format nomor telepon tidak valid";
     }
 
-    if (formData.socialLink && !formData.socialLink.startsWith('http')) {
-      newErrors.socialLink = "Link sosial harus dimulai dengan http:// atau https://";
+    if (formData.socialLink && !formData.socialLink.startsWith("http")) {
+      newErrors.socialLink =
+        "Link sosial harus dimulai dengan http:// atau https://";
     }
 
     return newErrors;
@@ -75,7 +91,9 @@ export default function RegisterCommunity() {
 
       if (uploadError) throw uploadError;
 
-      const imageUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/community-diskominfo/${fileName}`;
+      const imageUrl = `${
+        import.meta.env.VITE_SUPABASE_URL
+      }/storage/v1/object/public/community-diskominfo/${fileName}`;
       return imageUrl;
     } catch (error) {
       console.error("Upload error:", error);
@@ -98,12 +116,12 @@ export default function RegisterCommunity() {
     }
 
     try {
-      let profilePictureUrl = null;
+      let profilePicture = null;
 
       // Upload profile picture to Supabase if provided
       if (formData.profilePicture) {
         try {
-          profilePictureUrl = await uploadProfilePicture(formData.profilePicture);
+          profilePicture = await uploadProfilePicture(formData.profilePicture);
         } catch (uploadError) {
           setMessage("Gagal mengupload gambar profil. Silakan coba lagi.");
           setIsLoading(false);
@@ -118,7 +136,7 @@ export default function RegisterCommunity() {
         password: formData.password,
         phone_number: formData.phone_number.trim() || undefined,
         bio: formData.bio.trim() || undefined,
-        profilePicture: profilePictureUrl, // URL gambar dari Supabase
+        profilePicture: profilePicture, // URL gambar dari Supabase
         category: formData.category.trim() || undefined,
         socialLink: formData.socialLink.trim() || undefined,
       };
@@ -126,9 +144,9 @@ export default function RegisterCommunity() {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/auth/registercommunity`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(submitData),
         }
@@ -137,7 +155,9 @@ export default function RegisterCommunity() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Terjadi kesalahan saat mendaftarkan komunitas");
+        throw new Error(
+          data.message || "Terjadi kesalahan saat mendaftarkan komunitas"
+        );
       }
 
       if (data.success) {
@@ -154,13 +174,15 @@ export default function RegisterCommunity() {
           category: "",
           socialLink: "",
         });
-        
+
         // Clear file input
-        const fileInput = document.querySelector('input[name="profilePicture"]');
+        const fileInput = document.querySelector(
+          'input[name="profilePicture"]'
+        );
         if (fileInput) {
-          fileInput.value = '';
+          fileInput.value = "";
         }
-        
+
         // Redirect to login after 2 seconds
         setTimeout(() => {
           window.location.href = "/login";
@@ -168,37 +190,50 @@ export default function RegisterCommunity() {
       } else {
         throw new Error(data.message || "Registrasi komunitas gagal");
       }
-
     } catch (error) {
       console.error("Registration error:", error);
-      
+
       // Handle different types of errors
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+      if (error.name === "TypeError" && error.message.includes("fetch")) {
+        setMessage(
+          "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
+        );
       } else if (error.message.includes("fetch")) {
-        setMessage("Tidak dapat terhubung ke server. Periksa koneksi internet Anda.");
+        setMessage(
+          "Tidak dapat terhubung ke server. Periksa koneksi internet Anda."
+        );
       } else {
         // Try to parse server response errors
         try {
           const errorResponse = await error.response?.json();
-          const { message: serverMessage, errors: serverErrors } = errorResponse || {};
-          
-          setMessage(serverMessage || error.message || "Terjadi kesalahan saat mendaftarkan komunitas");
-          
+          const { message: serverMessage, errors: serverErrors } =
+            errorResponse || {};
+
+          setMessage(
+            serverMessage ||
+              error.message ||
+              "Terjadi kesalahan saat mendaftarkan komunitas"
+          );
+
           if (serverErrors) {
             setErrors(serverErrors);
           }
         } catch {
-          setMessage(error.message || "Terjadi kesalahan tidak terduga. Silakan coba lagi.");
+          setMessage(
+            error.message ||
+              "Terjadi kesalahan tidak terduga. Silakan coba lagi."
+          );
         }
       }
 
       // If there was an uploaded image but registration failed, clean up
-      if (formData.profilePicture && profilePictureUrl) {
+      if (formData.profilePicture && profilePicture) {
         try {
-          const fileName = profilePictureUrl.split("/community-diskominfo/")[1];
+          const fileName = profilePicture.split("/community-diskominfo/")[1];
           if (fileName) {
-            await supabase.storage.from("community-diskominfo").remove([fileName]);
+            await supabase.storage
+              .from("community-diskominfo")
+              .remove([fileName]);
           }
         } catch (cleanupError) {
           console.warn("Failed to cleanup uploaded image:", cleanupError);
@@ -222,7 +257,8 @@ export default function RegisterCommunity() {
               Daftarkan Komunitas Anda
             </h1>
             <p className="text-gray-600 text-lg">
-              Bergabunglah sebagai penyelenggara komunitas dan kelola member dengan mudah
+              Bergabunglah sebagai penyelenggara komunitas dan kelola member
+              dengan mudah
             </p>
           </div>
 
@@ -233,7 +269,9 @@ export default function RegisterCommunity() {
                 <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
                 <p className="text-green-800 font-medium">{message}</p>
               </div>
-              <p className="text-green-600 text-sm mt-1">Anda akan diarahkan ke halaman login...</p>
+              <p className="text-green-600 text-sm mt-1">
+                Anda akan diarahkan ke halaman login...
+              </p>
             </div>
           )}
 
@@ -267,14 +305,18 @@ export default function RegisterCommunity() {
                           onChange={handleChange}
                           placeholder="Masukkan nama komunitas"
                           className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
-                            errors.name ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                            errors.name
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300"
                           }`}
                           disabled={isLoading}
                           required
                         />
                       </div>
                       {errors.name && (
-                        <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.name}
+                        </p>
                       )}
                     </div>
 
@@ -292,14 +334,18 @@ export default function RegisterCommunity() {
                           onChange={handleChange}
                           placeholder="contoh@email.com"
                           className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
-                            errors.email ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                            errors.email
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300"
                           }`}
                           disabled={isLoading}
                           required
                         />
                       </div>
                       {errors.email && (
-                        <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.email}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -319,13 +365,17 @@ export default function RegisterCommunity() {
                           onChange={handleChange}
                           placeholder="08xxxxxxxxxx"
                           className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
-                            errors.phone_number ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                            errors.phone_number
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300"
                           }`}
                           disabled={isLoading}
                         />
                       </div>
                       {errors.phone_number && (
-                        <p className="mt-1 text-sm text-red-600">{errors.phone_number}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.phone_number}
+                        </p>
                       )}
                     </div>
 
@@ -343,14 +393,18 @@ export default function RegisterCommunity() {
                           onChange={handleChange}
                           placeholder="Minimal 8 karakter"
                           className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
-                            errors.password ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                            errors.password
+                              ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                              : "border-gray-300"
                           }`}
                           disabled={isLoading}
                           required
                         />
                       </div>
                       {errors.password && (
-                        <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.password}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -388,13 +442,17 @@ export default function RegisterCommunity() {
                         onChange={handleChange}
                         placeholder="https://instagram.com/komunitas-anda"
                         className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 ${
-                          errors.socialLink ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : 'border-gray-300'
+                          errors.socialLink
+                            ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                            : "border-gray-300"
                         }`}
                         disabled={isLoading}
                       />
                     </div>
                     {errors.socialLink && (
-                      <p className="mt-1 text-sm text-red-600">{errors.socialLink}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.socialLink}
+                      </p>
                     )}
                   </div>
 
@@ -440,12 +498,16 @@ export default function RegisterCommunity() {
                         </label>
                         <p className="mt-1">atau drag and drop</p>
                       </div>
-                      <p className="text-xs text-gray-500">PNG, JPG, JPEG, GIF maksimal 10MB</p>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG, JPEG, GIF maksimal 10MB
+                      </p>
                       {formData.profilePicture && (
                         <div className="mt-4">
                           <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
                             <CheckCircle className="w-4 h-4" />
-                            <span>File terpilih: {formData.profilePicture.name}</span>
+                            <span>
+                              File terpilih: {formData.profilePicture.name}
+                            </span>
                           </div>
                         </div>
                       )}
@@ -463,7 +525,9 @@ export default function RegisterCommunity() {
                       {isLoading ? (
                         <>
                           <Loader2 className="animate-spin h-5 w-5 mr-2" />
-                          {formData.profilePicture ? 'Mengupload logo & mendaftar...' : 'Mendaftarkan komunitas...'}
+                          {formData.profilePicture
+                            ? "Mengupload logo & mendaftar..."
+                            : "Mendaftarkan komunitas..."}
                         </>
                       ) : isSuccess ? (
                         <>
@@ -471,7 +535,7 @@ export default function RegisterCommunity() {
                           Berhasil Terdaftar!
                         </>
                       ) : (
-                        'Daftarkan Komunitas'
+                        "Daftarkan Komunitas"
                       )}
                     </button>
                   </div>
@@ -481,11 +545,17 @@ export default function RegisterCommunity() {
                 <div className="mt-8 text-center space-y-4">
                   <p className="text-gray-600">
                     Sudah punya akun?{" "}
-                    <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                    <a
+                      href="/login"
+                      className="text-blue-600 hover:text-blue-700 font-medium"
+                    >
                       Masuk di sini
                     </a>
                   </p>
-                  <a href="/" className="text-sm text-gray-500 hover:text-gray-700 inline-block">
+                  <a
+                    href="/"
+                    className="text-sm text-gray-500 hover:text-gray-700 inline-block"
+                  >
                     ← Kembali ke Beranda
                   </a>
                 </div>
