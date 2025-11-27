@@ -115,14 +115,16 @@ export default function RegisterCommunity() {
       return;
     }
 
+    let profilePicture = null;
+
     try {
-      let profilePicture = null;
 
       // Upload profile picture to Supabase if provided
       if (formData.profilePicture) {
         try {
           profilePicture = await uploadProfilePicture(formData.profilePicture);
         } catch (uploadError) {
+          console.error("Upload error:", uploadError);
           setMessage("Gagal mengupload gambar profil. Silakan coba lagi.");
           setIsLoading(false);
           return;
