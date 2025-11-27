@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 
 exports.registermember = async (req, res) => {
   try {
-    const { name, email, phone_number, password, bio, profilePicture } =
+    const { name, email, phone_number, password, bio, profilePictureUrl } =
       req.body;
 
     // Input validation
@@ -119,7 +119,7 @@ exports.registermember = async (req, res) => {
         phone_number: phone_number?.trim() || null,
         role: "MEMBER",
         bio: bio?.trim() || null,
-        profilePicture: profilePicture || null, // Store the Supabase URL
+        profilePicture: profilePictureUrl || null, // Store the Supabase URL
       },
       select: {
         id: true,
@@ -205,7 +205,7 @@ exports.registercommunity = async (req, res) => {
       phone_number,
       password,
       bio,
-      profilePicture,
+      profilePictureUrl,
       category,
       socialLink,
     } = req.body;
@@ -280,7 +280,7 @@ exports.registercommunity = async (req, res) => {
           passwordHash: passwordHash,
           role: "COMMUNITY",
           bio: bio || null,
-          profilePicture: profilePicture || null,
+          profilePicture: profilePictureUrl || null,
         },
       });
 
