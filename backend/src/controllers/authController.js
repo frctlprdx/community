@@ -1,125 +1,115 @@
+// src/controllers/authController.js
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 
+/**
+ * Helper: sanitize & normalize string (trim + empty -> null)
+ */
+function cleanString(value) {
+  if (typeof value !== "string") return null;
+  const v = value.trim();
+  return v === "" ? null : v;
+}
+
+/**
+ * Register member (normal user)
+ */
 exports.registermember = async (req, res) => {
   try {
-    const { name, email, phone_number, password, bio, profilePictureUrl } =
-      req.body;
+    const {
+      name,
+      email,
+      phone_number,
+      password,
+      bio,
+      profilePictureUrl,
+    } = req.body;
 
-    // Input validation
+    // Basic required validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
         message: "Nama, email, dan password wajib diisi",
-        errors: {
-          name: !name ? "Nama wajib diisi" : null,
-          email: !email ? "Email wajib diisi" : null,
-          password: !password ? "Password wajib diisi" : null,
-        },
       });
     }
+
+    // Normalize inputs
+    const cleanedName = name.trim();
+    const cleanedEmail = email.toLowerCase().trim();
+    const cleanedPhone = cleanString(phone_number);
+    const cleanedBio = cleanString(bio);
+    const cleanedProfilePicture = cleanString(profilePictureUrl);
 
     // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(cleanedEmail)) {
       return res.status(400).json({
         success: false,
         message: "Format email tidak valid",
-        errors: {
-          email: "Format email tidak valid",
-        },
       });
     }
 
-    // Password strength validation
+    // Password length
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
         message: "Password minimal 8 karakter",
-        errors: {
-          password: "Password minimal 8 karakter",
-        },
       });
     }
 
-    // Phone number validation (optional)
-    if (phone_number && !/^[0-9+\-\s()]+$/.test(phone_number)) {
+    // Phone validation (optional)
+    if (cleanedPhone && !/^[0-9+\-\s()]+$/.test(cleanedPhone)) {
       return res.status(400).json({
         success: false,
         message: "Format nomor telepon tidak valid",
-        errors: {
-          phone_number: "Format nomor telepon tidak valid",
-        },
       });
     }
 
-    // Validate profilePicture URL if provided
-    if (profilePicture && typeof profilePicture !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "URL gambar profil tidak valid",
-        errors: {
-          profilePicture: "URL gambar profil harus berupa string",
-        },
-      });
-    }
-
-    // Optional: Validate that profilePicture is a valid URL and from expected domain
-    if (profilePicture) {
+    // profilePictureUrl validation (if provided)
+    if (cleanedProfilePicture) {
       try {
-        const url = new URL(profilePicture);
-        // Check if it's from your Supabase storage
+        const url = new URL(cleanedProfilePicture);
+        // optional domain check (comment out or adjust if you accept other hosts)
         if (!url.href.includes("community-diskominfo")) {
           return res.status(400).json({
             success: false,
-            message: "URL gambar profil tidak valid",
-            errors: {
-              profilePicture:
-                "URL gambar tidak berasal dari sumber yang diizinkan",
-            },
+            message: "URL gambar tidak berasal dari sumber yang diizinkan",
           });
         }
-      } catch (urlError) {
+      } catch (e) {
         return res.status(400).json({
           success: false,
-          message: "URL gambar profil tidak valid",
-          errors: {
-            profilePicture: "Format URL gambar tidak valid",
-          },
+          message: "Format URL gambar tidak valid",
         });
       }
     }
 
-    // Check if email already exists
+    // Check existing email
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
+      where: { email: cleanedEmail },
     });
-
     if (existingUser) {
       return res.status(400).json({
         success: false,
         message: "Email sudah terdaftar",
-        errors: {
-          email: "Email sudah digunakan oleh pengguna lain",
-        },
       });
     }
 
-    // Hash password with higher salt rounds for better security
+    // Hash password
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Create new user with proper data handling including profilePicture URL
+    // Create user
     const newUser = await prisma.user.create({
       data: {
-        name: name.trim(),
-        email: email.toLowerCase().trim(),
+        name: cleanedName,
+        email: cleanedEmail,
         passwordHash,
-        phone_number: phone_number?.trim() || null,
+        phone_number: cleanedPhone,
         role: "MEMBER",
-        bio: bio?.trim() || null,
-        profilePicture: profilePictureUrl || null, // Store the Supabase URL
+        bio: cleanedBio,
+        profilePicture: cleanedProfilePicture,
       },
       select: {
         id: true,
@@ -133,70 +123,41 @@ exports.registermember = async (req, res) => {
       },
     });
 
-    // Log successful registration for monitoring
-    console.log(
-      `New member registered: ${newUser.email} at ${new Date().toISOString()}`
-    );
+    console.log(`New member registered: ${newUser.email}`);
 
-    // Success response
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Registrasi berhasil! Selamat bergabung dengan komunitas kami.",
-      data: {
-        user: newUser,
-      },
+      message: "Registrasi berhasil",
+      data: { user: newUser },
     });
   } catch (error) {
     console.error("Registration error:", error);
 
-    // Handle specific Prisma errors
+    // Prisma unique constraint
     if (error.code === "P2002") {
-      // Unique constraint violation
-      const target = error.meta?.target;
-      if (target?.includes("email")) {
-        return res.status(400).json({
-          success: false,
-          message: "Email sudah terdaftar",
-          errors: {
-            email: "Email sudah digunakan oleh pengguna lain",
-          },
-        });
-      }
-    }
-
-    // Handle validation errors
-    if (error.code === "P2000") {
       return res.status(400).json({
         success: false,
-        message: "Data yang diberikan tidak valid",
-        errors: {
-          general: "Periksa kembali data yang dimasukkan",
-        },
+        message: "Data sudah ada (kemungkinan email terdaftar)",
       });
     }
 
-    // Handle database connection errors
     if (error.code === "P1001") {
       return res.status(503).json({
         success: false,
-        message: "Layanan sedang tidak tersedia. Silakan coba lagi nanti.",
-        errors: {
-          server: "Database connection error",
-        },
+        message: "Layanan database sedang tidak tersedia",
       });
     }
 
-    // Generic server error
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Terjadi kesalahan pada server. Silakan coba lagi nanti.",
-      errors: {
-        server: "Internal server error",
-      },
+      message: "Terjadi kesalahan pada server",
     });
   }
 };
 
+/**
+ * Register community (creates user with role COMMUNITY + community + membership)
+ */
 exports.registercommunity = async (req, res) => {
   try {
     const {
@@ -210,7 +171,7 @@ exports.registercommunity = async (req, res) => {
       socialLink,
     } = req.body;
 
-    // Validasi input yang required
+    // Required validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -218,33 +179,63 @@ exports.registercommunity = async (req, res) => {
       });
     }
 
-    // Validasi format email
+    // Normalize
+    const cleanedName = name.trim();
+    const cleanedEmail = email.toLowerCase().trim();
+    const cleanedPhone = cleanString(phone_number);
+    const cleanedBio = cleanString(bio);
+    const cleanedProfilePicture = cleanString(profilePictureUrl);
+    const cleanedCategory = cleanString(category);
+    const cleanedSocialLink = cleanString(socialLink);
+
+    // Email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(cleanedEmail)) {
       return res.status(400).json({
         success: false,
         message: "Format email tidak valid",
       });
     }
 
-    // Validasi panjang password
+    // Password length
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
         message: "Password minimal 8 karakter",
       });
     }
-    if (socialLink && !socialLink.startsWith("http")) {
+
+    // socialLink validation
+    if (cleanedSocialLink && !/^https?:\/\//i.test(cleanedSocialLink)) {
       return res.status(400).json({
         success: false,
         message: "Link sosial harus dimulai dengan http:// atau https://",
       });
     }
 
-    // Cek apakah email sudah terdaftar
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email },
-    });
+    // profilePictureUrl validation
+    if (cleanedProfilePicture) {
+      try {
+        const url = new URL(cleanedProfilePicture);
+        if (!url.href.includes("community-diskominfo")) {
+          return res.status(400).json({
+            success: false,
+            message: "URL gambar tidak berasal dari sumber yang diizinkan",
+          });
+        }
+      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          message: "Format URL gambar tidak valid",
+        });
+      }
+    }
+
+    // Check existing email and community name (use trimmed/lowercase where appropriate)
+    const [existingUser, existingCommunity] = await Promise.all([
+      prisma.user.findUnique({ where: { email: cleanedEmail } }),
+      prisma.community.findFirst({ where: { name: cleanedName } }),
+    ]);
 
     if (existingUser) {
       return res.status(400).json({
@@ -252,12 +243,6 @@ exports.registercommunity = async (req, res) => {
         message: "Email sudah terdaftar",
       });
     }
-
-    // Cek apakah nama komunitas sudah ada
-    const existingCommunity = await prisma.community.findFirst({
-      where: { name: name },
-    });
-
     if (existingCommunity) {
       return res.status(400).json({
         success: false,
@@ -269,47 +254,44 @@ exports.registercommunity = async (req, res) => {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Mulai transaction untuk membuat user dan community sekaligus
-    const result = await prisma.$transaction(async (prisma) => {
-      // Buat user dengan role COMMUNITY
-      const newUser = await prisma.user.create({
+    // Use transaction with `tx` param (don't shadow global prisma)
+    const result = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
         data: {
-          name: name,
-          email: email,
-          phone_number: phone_number || null,
-          passwordHash: passwordHash,
+          name: cleanedName,
+          email: cleanedEmail,
+          phone_number: cleanedPhone,
+          passwordHash,
           role: "COMMUNITY",
-          bio: bio || null,
-          profilePicture: profilePictureUrl || null,
+          bio: cleanedBio,
+          profilePicture: cleanedProfilePicture,
         },
       });
 
-      // Buat community
-      const newCommunity = await prisma.community.create({
+      const newCommunity = await tx.community.create({
         data: {
-          name: name,
-          category: category || null,
-          socialLink: socialLink || null,
+          name: cleanedName,
+          category: cleanedCategory,
+          socialLink: cleanedSocialLink,
           memberCount: 1,
         },
       });
 
-      // Tambahkan owner sebagai member pertama komunitas
-      await prisma.communityMember.create({
+      await tx.communityMember.create({
         data: {
           userId: newUser.id,
           communityId: newCommunity.id,
-          role: "MEMBER", // atau role khusus untuk owner
+          role: "MEMBER", // keep as MEMBER or change to "ADMIN" if you prefer
         },
       });
 
       return { user: newUser, community: newCommunity };
     });
 
-    // Response sukses tanpa mengirim password hash
+    // Remove passwordHash from response
     const { passwordHash: _, ...userWithoutPassword } = result.user;
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Komunitas berhasil didaftarkan",
       data: {
@@ -320,15 +302,20 @@ exports.registercommunity = async (req, res) => {
   } catch (error) {
     console.error("Error registering community:", error);
 
-    // Handle Prisma specific errors
     if (error.code === "P2002") {
       return res.status(400).json({
         success: false,
         message: "Data sudah ada (email atau nama komunitas duplikat)",
       });
     }
+    if (error.code === "P1001") {
+      return res.status(503).json({
+        success: false,
+        message: "Layanan database sedang tidak tersedia",
+      });
+    }
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Terjadi kesalahan server",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
@@ -336,26 +323,29 @@ exports.registercommunity = async (req, res) => {
   }
 };
 
+/**
+ * Login
+ */
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    // Cari user berdasarkan email
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const { email, password } = req.body;
+    const cleanedEmail = email?.toLowerCase().trim();
 
+    if (!cleanedEmail || !password) {
+      return res.status(400).json({ message: "Email dan password wajib diisi" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: cleanedEmail } });
     if (!user) {
       return res.status(400).json({ message: "Email tidak ditemukan" });
     }
 
-    // Bandingkan password
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     if (!validPassword) {
       return res.status(401).json({ message: "Password salah" });
     }
 
-    // Cek role sebelum simpan login history
+    // Save login history for MEMBER or COMMUNITY
     if (user.role === "MEMBER" || user.role === "COMMUNITY") {
       await prisma.loginHistory.create({
         data: {
@@ -365,11 +355,19 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Jika sukses, kirim info user
-    res.status(200).json({ message: "Login berhasil", user });
+    // Don't expose passwordHash
+    const { passwordHash: _, ...userSafe } = user;
+
+    return res.status(200).json({ message: "Login berhasil", user: userSafe });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Terjadi kesalahan saat login", error: err.message });
+    console.error("Login error:", err);
+
+    if (err.code === "P1001") {
+      return res.status(503).json({
+        message: "Database tidak tersedia. Silakan coba lagi nanti.",
+      });
+    }
+
+    return res.status(500).json({ message: "Terjadi kesalahan saat login" });
   }
 };
