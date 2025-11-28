@@ -291,7 +291,6 @@ exports.registercommunity = async (req, res) => {
           category: category || null,
           socialLink: socialLink || null,
           memberCount: 1,
-          profilePicture: profilePicture || null,
         },
       });
 

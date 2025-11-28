@@ -118,7 +118,6 @@ export default function RegisterCommunity() {
     let profilePicture = null;
 
     try {
-
       // Upload profile picture to Supabase if provided
       if (formData.profilePicture) {
         try {
@@ -474,45 +473,6 @@ export default function RegisterCommunity() {
                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-gray-50"
                         disabled={isLoading}
                       />
-                    </div>
-                  </div>
-
-                  {/* Logo/Foto Profil */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Logo/Foto Profil Komunitas (Opsional)
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
-                      <Camera className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <div className="text-sm text-gray-600 mb-4">
-                        <label className="cursor-pointer">
-                          <span className="text-blue-600 font-medium hover:text-blue-500">
-                            Pilih logo komunitas
-                          </span>
-                          <input
-                            type="file"
-                            name="profilePicture"
-                            onChange={handleChange}
-                            accept="image/jpeg,image/jpg,image/png,image/gif"
-                            className="hidden"
-                            disabled={isLoading}
-                          />
-                        </label>
-                        <p className="mt-1">atau drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, JPEG, GIF maksimal 10MB
-                      </p>
-                      {formData.profilePicture && (
-                        <div className="mt-4">
-                          <div className="flex items-center justify-center space-x-2 text-sm text-green-600">
-                            <CheckCircle className="w-4 h-4" />
-                            <span>
-                              File terpilih: {formData.profilePicture.name}
-                            </span>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
 
