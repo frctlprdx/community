@@ -171,7 +171,6 @@ export default function RegisterCommunity() {
           phone_number: "",
           password: "",
           bio: "",
-          profilePicture: null,
           category: "",
           socialLink: "",
         });
